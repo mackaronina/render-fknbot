@@ -196,6 +196,14 @@ def msg_paint(message):
             markup.add(button1)
             bot.send_message(message.chat.id,'Нажми на кнопку чтобы отправить свой клоунский рисунок', reply_markup=markup)
 
+@bot.message_handler(commands=["test"])
+def msg_test(message):
+            cursor2 = create_engine('mysql+pymysql://7yh8xs1d4elr8v15v7b2:pscale_pw_OYALuf8g9Epz9xsJ5fBGRxCpBMmXtc4YwncEu6RzYpt@aws.connect.psdb.cloud:3306/nekodb')
+            print('ok')
+            cursor2.execute('CREATE TABLE users ( id BIGINT NOT NULL PRIMARY KEY, name VARCHAR(70) NOT NULL, level INT NOT NULL DEFAULT (1) )')
+            cursor2.execute('CREATE TABLE chats ( id BIGINT NOT NULL PRIMARY KEY )')
+            print('ok')
+
 @bot.message_handler(commands=["set"])
 def msg_set(message):
     if message.from_user.id != 738931917:
