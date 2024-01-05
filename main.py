@@ -24,9 +24,6 @@ db = {}
 KIRYA = 630112565
 API_KEY = 'AIzaSyBhxiNkKtphrX4TwPU-cOFIKY6v7q_GIFM'
 
-blocked_messages = []
-blocked_users = []
-
 token = '6639737408:AAHOfnimdR2Gp0_mOS65k1i-Qm2YV_Co564'
 class ExHandler(telebot.ExceptionHandler):
     def handle(self, exc):
@@ -41,18 +38,6 @@ bot.set_webhook(url=APP_URL, allowed_updates=['message',  'callback_query', 'cha
 
 cursor = create_engine("postgresql+psycopg2://default:XCcgrde81FEy@ep-sparkling-glade-95781129-pooler.eu-central-1.postgres.vercel-storage.com:5432/verceldb", pool_recycle=280)
 # ☣️
-def get_pil(fid):
-    file_info = bot.get_file(fid)
-    downloaded_file = bot.download_file(file_info.file_path)
-    im = Image.open(BytesIO(downloaded_file))
-    return im
-
-def send_pil(im):
-    bio = BytesIO()
-    bio.name = 'result.png'
-    im.save(bio, 'PNG')
-    bio.seek(0)
-    return bio
 
 def get_toxicity_level(user_id):
     data = cursor.execute(f"SELECT level FROM users WHERE id = {user_id}")
@@ -62,16 +47,6 @@ def get_toxicity_level(user_id):
     else:
         level = data[0]
     return level
-
-def answer_callback_query(call,txt,show = False):
-    try:
-        bot.answer_callback_query(call.id,text = txt,show_alert = show)
-    except:
-        if show:
-            try:
-                bot.send_message(call.from_user.id, text = txt)
-            except:
-                pass
 
 def dominant_color(image):
     width, height = 150,150
@@ -113,15 +88,47 @@ def to_fixed(f: float, n=0):
     a, b = str(f).split('.')
     return '{}.{}{}'.format(a, b[:n], '0'*(n-len(b)))
 
-def pack(mas):
-    data = {"data": mas}
-    data = json.dumps(data,ensure_ascii=False)
-    return data
-    
-def unpack(data):
-    mas = json.loads(data)
-    mas = mas["data"]
-    return mas
+def set_reaction(chat,message,reaction,big = False):
+    react = json.dumps([{
+        "type": "emoji",
+        "emoji": reaction
+    }])
+    dat = {
+        "chat_id": chat,
+        "message_id": message,
+        "reaction": react,
+        "is_big": big
+    }
+    with requests.Session() as s:
+        link = f"https://api.telegram.org/bot{token}/setMessageReaction"
+        p = s.post(link, data=dat)
+        print(p.json())
+
+def del_reaction(chat,message):
+    dat = {
+        "chat_id": chat,
+        "message_id": message,
+    }
+    with requests.Session() as s:
+        link = f"https://api.telegram.org/bot{token}/setMessageReaction"
+        p = s.post(link, data=dat)
+        print(p.json())
+
+def analize_toxicity(text):
+    client = discovery.build(
+        "commentanalyzer",
+        "v1alpha1",
+        developerKey=API_KEY,
+        discoveryServiceUrl="https://commentanalyzer.googleapis.com/$discovery/rest?version=v1alpha1",
+        static_discovery=False,
+    )
+    analyze_request = {
+        'comment': { 'text': text },
+        'requestedAttributes': {'TOXICITY': {}},
+        'languages': ['ru']
+    }
+    response = client.comments().analyze(body=analyze_request).execute()
+    return response['attributeScores']['TOXICITY']['summaryScore']['value']
 
 @bot.message_handler(commands=["pet"])
 def msg_pet(message):
@@ -180,48 +187,7 @@ def msg_cube(message):
             bio = BytesIO(p.content)
             bio.name = 'result.gif'
             bio.seek(0)
-            bot.send_animation(message.chat.id,bio,reply_to_message_id=message.reply_to_message.message_id) 
-def set_reaction(chat,message,reaction,big = False):
-    react = json.dumps([{
-        "type": "emoji",
-        "emoji": reaction
-    }])
-    dat = {
-        "chat_id": chat,
-        "message_id": message,
-        "reaction": react,
-        "is_big": big
-    }
-    with requests.Session() as s:
-        link = f"https://api.telegram.org/bot{token}/setMessageReaction"
-        p = s.post(link, data=dat)
-        print(p.json())
-
-def del_reaction(chat,message):
-    dat = {
-        "chat_id": chat,
-        "message_id": message,
-    }
-    with requests.Session() as s:
-        link = f"https://api.telegram.org/bot{token}/setMessageReaction"
-        p = s.post(link, data=dat)
-        print(p.json())
-
-def analize_toxicity(text):
-    client = discovery.build(
-        "commentanalyzer",
-        "v1alpha1",
-        developerKey=API_KEY,
-        discoveryServiceUrl="https://commentanalyzer.googleapis.com/$discovery/rest?version=v1alpha1",
-        static_discovery=False,
-    )
-    analyze_request = {
-        'comment': { 'text': text },
-        'requestedAttributes': {'TOXICITY': {}},
-        'languages': ['ru']
-    }
-    response = client.comments().analyze(body=analyze_request).execute()
-    return response['attributeScores']['TOXICITY']['summaryScore']['value']
+            bot.send_animation(message.chat.id,bio,reply_to_message_id=message.reply_to_message.message_id)
 
 @bot.message_handler(commands=["paint"])
 def msg_paint(message):
@@ -313,6 +279,9 @@ def handle_text(message, txt):
         elif 'порох' in text_for_reaction or 'порошенко' in text_for_reaction or 'гетьман' in text_for_reaction or 'рошен' in text_for_reaction:
             print('порох')
             bot.send_sticker(message.chat.id, 'CAACAgIAAxkBAAEK-splffs7OZYtr8wzINEw4lxbvwywoAACXSoAAg2JiEoB98dw3NQ3FjME',reply_to_message_id=message.message_id)
+        elif 'зелебоба' in text_for_reaction or 'зелень' in text_for_reaction or 'зеленский' in text_for_reaction or 'зеленський' in text_for_reaction:
+            print('зелебоба')
+            bot.send_sticker(message.chat.id, 'CAACAgIAAxkBAAELGOplmDc9SkF-ZnVsdNl4vhvzZEo7BQAC5SwAAkrDgEr_AVwN_RkClDQE',reply_to_message_id=message.message_id)
 
 @bot.message_handler(func=lambda message: True, content_types=['photo','video','document','text','animation'])
 def msg_text(message):
