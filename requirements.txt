@@ -7,3 +7,4 @@ pyTelegramBotAPI==4.14.1
 schedule==1.2.1
 SQLAlchemy==1.4.48
 psycopg2==2.9.9
+lxml==4.9.3
