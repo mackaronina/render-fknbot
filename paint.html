@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>PAINT</title>
+	<script src="https://telegram.org/js/telegram-web-app.js"></script> <!--Подключаем скрипт от телеграм-->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/fullPage.js/3.0.9/fullpage.js" integrity="sha512-eH2N2Zt2AeLuFlFvRSEeZcVeAESY+8nfIqhxx0XXEou6w/ G4lLY3K8UKNYqi6e1pLXDduVF1KF/lbyxy3+X6OA==" crossorigin="anonymous"></script>
+	<style>
+		body{
+			color: var(--tg-theme-text-color);
+			background: var(--tg-theme-bg-color);
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			font-size: 18px;
+			text-align: center;
+			overflow: hidden;
+		}
+		.a{
+			display: flex;
+			flex-direction: row;
+			margin: 0 -10px;
+		}
+
+		.b{
+			display: flex;
+			flex-direction: column;
+			margin: 0 15px;
+		}
+		canvas{
+			border-style: solid;
+			border-width: 5px;
+			border-color: #cacd58;
+		}
+		button{
+			background-color: #3b88c3;
+			color: white;
+			font-weight: bold;
+			text-align: center;
+			width: 60px;
+			height: 60px;
+			border: none;
+    		border-radius: 20%;
+		}
+	</style>
+</head>
+<body>
+	<iframe width="350" height="2100" frameborder="0" style="border: 0"></iframe>
+	<canvas id="canvas" width="350" height="350"></canvas>
+	<div class="a">
+		<div class="b">
+			<p>Цвет</p>
+			<input type="color" id="select">
+		</div>
+		<div class="b">
+			<p>Толщина</p>
+			<select id="line">
+			<option value="1">1</option>
+			<option value="2">2</option>
+			<option value="4">4</option>
+			<option value="8">8</option>
+			<option value="16">16</option>
+			<option value="32">32</option>
+			<option value="64">64</option>
+			</select>
+		</div>
+		<div class="b">
+		<br>
+		<button type="button" id="clear"><img class="but_img" src="{{ url_for('static',filename='clear.png') }}" width="50" height="50" alt="loading..."></button>
+		</div>
+		<div class="b">
+		<br>
+		<button type="button" id="undo"><img class="but_img" src="{{ url_for('static',filename='undo.png') }}" width="50" height="50" alt="loading...">
+		</button>
+		</div>
+	</div>
+	<iframe width="350" height="150" frameborder="0" style="border: 0" id="iframus"></iframe>
+</body>
+
+<script>
+	let canvlist = [];
+	let tg = window.Telegram.WebApp; //получаем объект webapp телеграма 
+	tg.expand(); //расширяем на все окно  
+	tg.MainButton.text = "Send picture"; //изменяем текст кнопки 
+	tg.MainButton.setText("Send picture"); //изменяем текст кнопки иначе
+	tg.MainButton.show();
+	tg.MainButton.enable();
+	let chatik = '-1001152773192';
+	if(tg.initDataUnsafe.start_param) {
+		chatik = tg.initDataUnsafe.start_param;
+	}
+	let canvas = document.getElementById("canvas"),
+	context = canvas.getContext("2d"),
+	mouse = { x:0, y:0 },
+	draw = false; 
+	let iframus = document.getElementById("iframus");
+	if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+    	iframus.height = "150";
+  	} else {
+    	iframus.height = "10";
+	}
+	function test() {
+		window.scrollBy(0, window.innerHeight);
+	}
+	setInterval(test,10);
+	Telegram.WebApp.onEvent('mainButtonClicked', function(){
+		tg.MainButton.hide()
+		tg.MainButton.disable()
+		canvas.toBlob(function(blob){
+			let data = new FormData();
+			data.append('file', blob, 'file')
+			fetch(`/send_paint/${chatik}`, {
+				method: 'POST',
+				body: data
+			}).then(function (response) {
+				tg.close();
+			});
+		},'image/png');
+	});
+
+	context.beginPath();
+	context.rect(0, 0, 400, 400);
+	context.fillStyle = "white";
+	context.fill();
+	context.strokeStyle = "black";
+	context.lineCap = "round";
+	context.lineJoin = "round";
+	canvas.addEventListener("mousedown", function(e){
+		let ClientRect = this.getBoundingClientRect();
+		mouse.x = e.clientX - ClientRect.left;
+		mouse.y = e.clientY - ClientRect.top;
+	
+		draw = true;
+		context.beginPath();
+		context.moveTo(mouse.x, mouse.y);
+		canvas.toBlob(function(blob){
+			canvlist.push(blob);
+		},'image/png');
+	});
+
+	canvas.addEventListener("mousemove", function(e){
+		if(draw === true){
+			let ClientRect = this.getBoundingClientRect();
+			mouse.x = e.clientX - ClientRect.left;
+			mouse.y = e.clientY - ClientRect.top;
+			context.lineTo(mouse.x, mouse.y);
+			context.stroke();
+		}
+	});
+
+	canvas.addEventListener("mouseup", function(e){
+		context.lineCap = "round";
+		let ClientRect = this.getBoundingClientRect();
+		mouse.x = e.clientX - ClientRect.left;
+		mouse.y = e.clientY - ClientRect.top;
+		context.lineTo(mouse.x, mouse.y);
+		context.stroke();
+		context.closePath();
+		
+		draw = false;
+	});
+
+	canvas.addEventListener("touchstart", function(e){
+		let ClientRect = this.getBoundingClientRect();
+		mouse.x = e.changedTouches[0].clientX - ClientRect.left;
+		mouse.y = e.changedTouches[0].clientY - ClientRect.top;
+		
+		draw = true;
+		context.beginPath();
+		context.moveTo(mouse.x, mouse.y);
+		canvas.toBlob(function(blob){
+			canvlist.push(blob);
+		},'image/png');
+	});
+	canvas.addEventListener("touchmove", function(e){
+		if(draw === true){
+			let ClientRect = this.getBoundingClientRect();
+	
+			mouse.x = e.changedTouches[0].clientX - ClientRect.left;
+			mouse.y = e.changedTouches[0].clientY - ClientRect.top;
+			context.lineTo(mouse.x, mouse.y);
+			context.stroke();
+			
+		}
+	});
+
+	canvas.addEventListener("touchend", function(e){
+		let ClientRect = this.getBoundingClientRect();
+		mouse.x = e.changedTouches[0].clientX - ClientRect.left;
+		mouse.y = e.changedTouches[0].clientY - ClientRect.top;
+		context.lineTo(mouse.x, mouse.y);
+		context.stroke();
+		context.closePath();
+		draw = false;
+	});
+
+	let select = document.getElementById("select");
+	select.addEventListener("change", function() {
+		context.strokeStyle = select.value;
+	});
+
+	let line = document.getElementById("line");
+	line.addEventListener("change", function() {
+		context.lineWidth = line.value;
+	});
+
+	let undo = document.getElementById("undo");
+	undo.addEventListener("click", function(e){
+		if (canvlist.length !== 0) {
+			let oldcanv = canvlist.pop();
+			createImageBitmap(oldcanv).then(function (img) {
+				context.drawImage(img, 0, 0);
+			});
+		}
+	});
+
+	let clear = document.getElementById("clear");
+	clear.addEventListener("click", function(e){
+		let step;
+		canvas.toBlob(function(blob){
+			canvlist.push(blob);
+		},'image/png');
+		for (step = 0; step < 3; step++ ){
+			context.rect(0, 0, 400, 400);
+			context.fill();	
+		}
+	});
+	//работает только в attachment menu
+	// let pic = document.createElement('img'); //создаем img
+	// pic.src = tg.initDataUnsafe.user.photo_url; //задаём src 
+	// usercard.appendChild(pic); //добавляем элемент в карточку 
+</script>
+</html>
