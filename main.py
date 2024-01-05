@@ -34,7 +34,7 @@ class ExHandler(telebot.ExceptionHandler):
         return True
 bot = telebot.TeleBot(token, threaded=True, num_threads=10, parse_mode='HTML', exception_handler = ExHandler())
 
-APP_URL = f'https://fknbot.vercel.app/{token}'
+APP_URL = f'https://fknbot.onrender.com/{token}'
 app = Flask(__name__)
 bot.remove_webhook()
 bot.set_webhook(url=APP_URL, allowed_updates=['message',  'callback_query', 'chat_member'])
