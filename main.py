@@ -13,6 +13,7 @@ import requests
 from bs4 import BeautifulSoup
 import random
 import re
+import os
 import json
 import html
 import math
@@ -35,7 +36,9 @@ app = Flask(__name__)
 bot.remove_webhook()
 bot.set_webhook(url=APP_URL, allowed_updates=['message',  'callback_query', 'chat_member'])
 
-cursor = create_engine('mysql+pymysql://xb2s2mgah3y7m6t5wiwa:pscale_pw_EVFaNcDataIfMtDyBPxIRs0AZvTlRCuYlGdxXcqtod3@aws.connect.psdb.cloud:3306/nekodb', pool_recycle=280, connect_args={'ssl': {'ssl-mode': 'preferred'}})
+username = os.environ['USERNAME']
+password = os.environ['PASSWORD']
+cursor = create_engine(f'mysql+pymysql://{username}:{password}@eu-central.connect.psdb.cloud:3306/nekodb', pool_recycle=280, connect_args={'ssl': {'ssl-mode': 'preferred'}})
 db = []
 # ☣️
 
@@ -351,9 +354,10 @@ def init_db():
     if data is not None:
         for dat in data:
             db.append(dat[0])
+    print(db)
 
 if __name__ == '__main__':
-    #init_db()
+    init_db()
     bot.send_message(738931917, 'Запущено')
     schedule.every().day.at("23:00").do(jobday)
     t = Thread(target=updater)
