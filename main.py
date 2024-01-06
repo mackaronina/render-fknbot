@@ -20,7 +20,6 @@ from sqlalchemy import create_engine
 import traceback
 from datetime import datetime, timedelta
 
-db = {}
 KIRYA = 630112565
 API_KEY = 'AIzaSyBhxiNkKtphrX4TwPU-cOFIKY6v7q_GIFM'
 
@@ -36,7 +35,8 @@ app = Flask(__name__)
 bot.remove_webhook()
 bot.set_webhook(url=APP_URL, allowed_updates=['message',  'callback_query', 'chat_member'])
 
-cursor = create_engine("postgresql+psycopg2://default:XCcgrde81FEy@ep-sparkling-glade-95781129-pooler.eu-central-1.postgres.vercel-storage.com:5432/verceldb", pool_recycle=280)
+cursor = create_engine('mysql+pymysql://wgcs96ltx8guffmeprw6:pscale_pw_gRkM6me9EOVycV7PdJKmBhwr3E3MV5ZPQrFyVlYmlkF@aws.connect.psdb.cloud:3306/nekodb', pool_recycle=280, connect_args={'ssl': {'ssl-mode': 'preferred'}})
+db = []
 # ☣️
 
 def get_toxicity_level(user_id):
@@ -264,9 +264,9 @@ def msg_top(message):
 
 def handle_text(message, txt):
         print('Сообщение получено')
-        if message.chat.id != message.from_user.id and str(message.chat.id) not in db:
-            db[str(message.chat.id)] = 'chatinfo'
-            print(db.keys())
+        if message.chat.id < 0 and message.chat.id not in db:
+            db.append(message.chat.id)
+            cursor.execute(f'INSERT INTO chats (id) VALUES ({message.chat.id})')
         #res = text2toxicity(txt, False)
         if message.from_user.id == KIRYA:
             return
@@ -347,15 +347,22 @@ def updater():
         time.sleep(1)
         
 def jobday():
-    for key in db:
+    for chatid in db:
         try:
-            chatid = int(key)
-            if chatid < 0:
-                bot.send_sticker(chatid, 'CAACAgIAAxkBAAEKWq5lDOyAX1vNodaWsT5amK0vGQe_ggACHCkAAspLuUtESxXfKFwfWTAE')
+            bot.send_sticker(chatid, 'CAACAgIAAxkBAAEKWq5lDOyAX1vNodaWsT5amK0vGQe_ggACHCkAAspLuUtESxXfKFwfWTAE')
         except Exception as e:
             print(e)
 
+def init_db():
+    data = cursor.execute('SELECT id FROM chats')
+    data = data.fetchall()
+    if data is not None:
+        for dat in data:
+            db.append(dat[0])
+
 if __name__ == '__main__':
+    init_db()
+    bot.send_message(738931917, 'Запущено')
     schedule.every().day.at("23:00").do(jobday)
     t = Thread(target=updater)
     t.start()
