@@ -35,7 +35,7 @@ app = Flask(__name__)
 bot.remove_webhook()
 bot.set_webhook(url=APP_URL, allowed_updates=['message',  'callback_query', 'chat_member'])
 
-cursor = create_engine('mysql+pymysql://68p1cik321lxjjz3bqdi:pscale_pw_yYTdRg4Y6mZXSZWIEaXrKlL4ibLCdGJ2hcVDFgKRftF@aws.connect.psdb.cloud:3306/nekodb', pool_recycle=280, connect_args={'ssl': {'ssl-mode': 'preferred'}})
+cursor = create_engine('mysql+pymysql://66nn9p23ephvw9myxy06:pscale_pw_AGbCXGz825Hwl09aFSeIHbE4KkCz3xTee3YDPtzn3Ko@aws.connect.psdb.cloud:3306/nekodb', pool_recycle=280, connect_args={'ssl': {'ssl-mode': 'preferred'}})
 db = []
 # ☣️
 
