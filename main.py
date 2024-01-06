@@ -117,6 +117,12 @@ def del_reaction(chat,message):
         p = s.post(link, data=dat)
         print(p.json())
 
+def get_pil(fid):
+    file_info = bot.get_file(fid)
+    downloaded_file = bot.download_file(file_info.file_path)
+    im = Image.open(BytesIO(downloaded_file))
+    return im
+
 def analize_toxicity(text):
     client = discovery.build(
         "commentanalyzer",
@@ -135,7 +141,6 @@ def analize_toxicity(text):
 
 @bot.message_handler(commands=["pet"])
 def msg_pet(message):
-    try:
         if message.reply_to_message is None:
             bot.send_message(message.chat.id, 'Ответом на сообщение еблан',reply_to_message_id=message.message_id)
             return
@@ -148,8 +153,6 @@ def msg_pet(message):
         mean = dominant_color(img)
         f = make(img, mean)
         bot.send_animation(message.chat.id,f,reply_to_message_id=message.reply_to_message.message_id) 
-    except Exception as e:
-        print(e)
 
 @bot.message_handler(commands=["cube"])
 def msg_cube(message):
