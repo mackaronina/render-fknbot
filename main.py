@@ -255,9 +255,9 @@ def msg_top(message):
             name = d[1]
             level = d[2]
             if i == 1:
-                text += f'🏆 <b><a href="tg://user?id={idk}">{name}</a></b>  {level} ☣️\n'
+                text += f'🏆 <b>{name}</b>  {level} ☣️\n'
             else:
-                text += f'{i}.   <a href="tg://user?id={idk}">{name}</a>  {level} ☣️\n'
+                text += f'{i}.  {name}  {level} ☣️\n'
             i += 1
     bot.send_message(message.chat.id,text,reply_to_message_id=message.message_id) 
 
@@ -273,12 +273,13 @@ def handle_text(message, txt):
         if (res > 0.6) and (message.from_user.id > 0):
             chel = html.escape(message.from_user.first_name, quote = True)
             set_reaction(message.chat.id,message.id,"😈")
-            data = cursor.execute(f"SELECT id FROM users WHERE id = {message.from_user.id}")
-            data = data.fetchone()
-            if data is None:
-                cursor.execute(f"INSERT INTO users (id, name) VALUES ({message.from_user.id}, %s)", chel)
-            else:
-                cursor.execute(f"UPDATE users SET level = level + 1, name = %s WHERE id = {message.from_user.id}", chel)
+            if message.chat.id in [-1001694727085, -1001646530790, -1001596293991, -1001592397575, -1001152773192]:
+                data = cursor.execute(f"SELECT id FROM users WHERE id = {message.from_user.id}")
+                data = data.fetchone()
+                if data is None:
+                    cursor.execute(f"INSERT INTO users (id, name) VALUES ({message.from_user.id}, %s)", chel)
+                else:
+                    cursor.execute(f"UPDATE users SET level = level + 1, name = %s WHERE id = {message.from_user.id}", chel)
         text_for_reaction = re.sub('[^а-я]', ' ', txt.lower()).split()
         if 'сбу' in text_for_reaction:
             print('сбу')
