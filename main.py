@@ -246,17 +246,18 @@ def msg_toxic(message):
 @bot.message_handler(commands=["top"])
 def msg_top(message):
     text = 'Эти челы написали больше всего токсичных сообщений. Могут ли они гордиться этим? Несомненно\n\n'
-    data = cursor.execute(f'SELECT name, level FROM users ORDER BY level DESC LIMIT 10')
+    data = cursor.execute(f'SELECT id, name, level FROM users ORDER BY level DESC LIMIT 10')
     data = data.fetchall()
     i = 1
     if data is not None:
         for d in data:
-            name = d[0]
-            level = d[1]
+            idk = d[0]
+            name = d[1]
+            level = d[2]
             if i == 1:
-                text += f'🏆 <b>{name}</b>  {level} ☣️\n'
+                text += f'🏆 <b><a href="tg://user?id={idk}">{name}</a></b>  {level} ☣️\n'
             else:
-                text += f'{i}.  {name}  {level} ☣️\n'
+                text += f'{i}.   <a href="tg://user?id={idk}">{name}</a>  {level} ☣️\n'
             i += 1
     bot.send_message(message.chat.id,text,reply_to_message_id=message.message_id) 
 
