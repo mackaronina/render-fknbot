@@ -149,7 +149,7 @@ def analize_toxicity(text):
 
 def draw_text_rectangle(draw,text,rect_w,rect_h,cord_x,cord_y):
     text = text.upper()
-    lines = textwrap.wrap(text, width=14)
+    lines = textwrap.wrap(text, width=16)
     text = '\n'.join(lines)
     selected_size = 1
     for size in range(1, 150):
