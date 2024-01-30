@@ -149,7 +149,7 @@ def analize_toxicity(text):
 
 def draw_text_rectangle(draw,text,rect_w,rect_h,cord_x,cord_y):
     text = text.upper()
-    lines = textwrap.wrap(text, width=16)
+    lines = textwrap.wrap(text, width=14)
     text = '\n'.join(lines)
     selected_size = 1
     for size in range(1, 150):
@@ -164,12 +164,16 @@ def draw_text_rectangle(draw,text,rect_w,rect_h,cord_x,cord_y):
 
 @bot.message_handler(commands=["necoarc"])
 def msg_necoarc(message):
-        if message.reply_to_message is None or message.reply_to_message.text is None:
-            bot.send_message(message.chat.id, 'Ответом на сообщение еблан',reply_to_message_id=message.message_id)
+        if message.reply_to_message is None or (message.reply_to_message.text is None and message.reply_to_message.caption is None):
+            bot.send_message(message.chat.id, 'Ответом на текст еблан',reply_to_message_id=message.message_id)
             return
         with Image.open('necoarc.png') as img:
             draw = ImageDraw.Draw(img)
-            draw_text_rectangle(draw, message.reply_to_message.text, 220, 106, 336, 80)
+            if message.reply_to_message.text is not None:
+                text = message.reply_to_message.text
+            else:
+                text = message.reply_to_message.caption
+            draw_text_rectangle(draw, text, 220, 106, 336, 80)
             bot.add_sticker_to_set(user_id=738931917,name='necoarc_by_fknclown_bot',emojis='🫵',png_sticker=send_pil(img))
             sset = bot.get_sticker_set('necoarc_by_fknclown_bot')
             bot.send_sticker(message.chat.id, sset.stickers[-1].file_id)
