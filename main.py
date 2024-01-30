@@ -162,8 +162,8 @@ def draw_text_rectangle(draw,text,rect_w,rect_h,cord_x,cord_y):
     arial = ImageFont.FreeTypeFont('comicbd.ttf', size=selected_size)
     draw.multiline_text((cord_x, cord_y), text, fill='black', anchor='mm', font=arial, align='center', spacing=0)
 
-@bot.message_handler(commands=["say"])
-def msg_say(message):
+@bot.message_handler(commands=["necoarc"])
+def msg_necoarc(message):
         if message.reply_to_message is None or message.reply_to_message.text is None:
             bot.send_message(message.chat.id, 'Ответом на сообщение еблан',reply_to_message_id=message.message_id)
             return
