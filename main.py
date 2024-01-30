@@ -4,6 +4,7 @@ from flask import Flask, request, send_from_directory, send_file, jsonify, rende
 from petpetgif.saveGif import save_transparent_gif
 from io import BytesIO, StringIO
 from PIL import Image,ImageDraw,ImageFont, ImageStat
+import textwrap
 from pkg_resources import resource_stream
 from threading import Thread
 from googleapiclient import discovery
@@ -123,6 +124,13 @@ def get_pil(fid):
     im = Image.open(BytesIO(downloaded_file))
     return im
 
+def send_pil(im):
+    bio = BytesIO()
+    bio.name = 'result.png'
+    im.save(bio, 'PNG')
+    bio.seek(0)
+    return bio
+
 def analize_toxicity(text):
     client = discovery.build(
         "commentanalyzer",
@@ -138,6 +146,33 @@ def analize_toxicity(text):
     }
     response = client.comments().analyze(body=analyze_request).execute()
     return response['attributeScores']['TOXICITY']['summaryScore']['value']
+
+def draw_text_rectangle(draw,text,rect_w,rect_h,cord_x,cord_y):
+    text = text.upper()
+    lines = textwrap.wrap(text, width=16)
+    text = '\n'.join(lines)
+    selected_size = 1
+    for size in range(1, 150):
+        arial = ImageFont.FreeTypeFont('comicbd.ttf', size=size)
+        #w, h = arial.getsize(text)
+        w, h = draw.multiline_textsize(text=text,font=arial,spacing=0)
+        if w > rect_w or h > rect_h:
+            break 
+        selected_size = size   
+    arial = ImageFont.FreeTypeFont('comicbd.ttf', size=selected_size)
+    draw.multiline_text((cord_x, cord_y), text, fill='black', anchor='mm', font=arial, align='center', spacing=0)
+
+@bot.message_handler(commands=["say"])
+def msg_say(message):
+        if message.reply_to_message is None or message.reply_to_message.text is None:
+            bot.send_message(message.chat.id, 'Ответом на сообщение еблан',reply_to_message_id=message.message_id)
+            return
+        with Image.open('necoarc.png') as img:
+            draw = ImageDraw.Draw(img)
+            draw_text_rectangle(draw, message.reply_to_message.text, 220, 106, 336, 80)
+            bot.add_sticker_to_set(user_id=738931917,name='necoarc_by_fknclown_bot',emojis='🫵',png_sticker=send_pil(img))
+            sset = bot.get_sticker_set('necoarc_by_fknclown_bot')
+            bot.send_sticker(message.chat.id, sset.stickers[-1].file_id)
 
 @bot.message_handler(commands=["pet"])
 def msg_pet(message):
