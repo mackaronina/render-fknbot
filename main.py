@@ -178,6 +178,10 @@ def msg_necoarc(message):
             sset = bot.get_sticker_set('necoarc_by_fknclown_bot')
             bot.send_sticker(message.chat.id, sset.stickers[-1].file_id)
 
+@bot.message_handler(commands=["joke"])
+def msg_joke(message):
+    bot.send_photo(message.chat.id, photo=r'https://readme-jokes.vercel.app/api?bgColor=%23073b4c&textColor=%2306d6a0&aColor=%2306d6a0&borderColor=%2306d6a0')
+
 @bot.message_handler(commands=["pet"])
 def msg_pet(message):
         if message.reply_to_message is None:
