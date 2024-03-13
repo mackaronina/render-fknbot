@@ -322,7 +322,7 @@ def handle_text(message, txt):
                 if data is None:
                     cursor.execute(f"INSERT INTO users (id, name) VALUES ({message.from_user.id}, %s)", chel)
                 else:
-                    cursor.execute(f"UPDATE users SET level = level + 1, name = %s WHERE id = {message.from_user.id}", chel)
+                    cursor.execute(f"UPDATE users SET level = level + 1, today = today + 1, name = %s WHERE id = {message.from_user.id}", chel)
         text_for_reaction = re.sub('[^а-я]', ' ', txt.lower()).split()
         if 'сбу' in text_for_reaction:
             print('сбу')
@@ -390,9 +390,16 @@ def updater():
         time.sleep(1)
         
 def jobday():
+    data = cursor.execute(f"SELECT id, name FROM users WHERE today IN (SELECT MAX(today) FROM users)")
+    data = data.fetchone()
+    idk = data[0]
+    chel = data[1]
+    txt = f'Токсик дня <a href="tg://user?id={idk}">{chel}</a>'
+    cursor.execute(f"UPDATE users SET today = 0")
     for chatid in db:
         try:
             bot.send_sticker(chatid, 'CAACAgIAAxkBAAEKWq5lDOyAX1vNodaWsT5amK0vGQe_ggACHCkAAspLuUtESxXfKFwfWTAE')
+            bot.send_message(chatid, txt)
         except Exception as e:
             print(e)
 
