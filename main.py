@@ -213,6 +213,7 @@ def msg_bay(message):
         arial = ImageFont.FreeTypeFont('times-new-roman.ttf', size=90)
         draw.multiline_text((450, 450), 'ОТБАЙРАКТАРЕН', fill=(150, 0, 24), anchor='mm', font=arial, align='center', spacing=4, stroke_width=4, stroke_fill=(53, 53, 53))
         img2 = img2.rotate(45)
+        img = img.convert("L")
         img.paste(img2, (-130,-130), img2.convert('RGBA'))
         bot.send_sticker(message.chat.id, send_pil(img))
 
