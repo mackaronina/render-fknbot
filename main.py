@@ -218,7 +218,7 @@ def msg_bay(message):
             return
         fid = r.photos[0][-1].file_id
         img = get_pil(fid)
-        font = ImageFont.truetype('times-new-roman.ttf', size=16)
+        font = ImageFont.truetype('times-new-roman.ttf', size=42)
         draw = ImageDraw.Draw(img)
         fillcolor = (150, 0, 24)
         shadowcolor = (53, 53, 53)
