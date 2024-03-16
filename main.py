@@ -162,16 +162,6 @@ def draw_text_rectangle(draw,text,rect_w,rect_h,cord_x,cord_y):
     arial = ImageFont.FreeTypeFont('comicbd.ttf', size=selected_size)
     draw.multiline_text((cord_x, cord_y), text, fill='black', anchor='mm', font=arial, align='center', spacing=0)
 
-def draw_stroke(draw,font,fillcolor,shadowcolor,text,x,y):
-    draw.text((x-2, y), text, font=font, fill=shadowcolor)
-    draw.text((x+2, y), text, font=font, fill=shadowcolor)
-    draw.text((x, y-2), text, font=font, fill=shadowcolor)
-    draw.text((x, y+2), text, font=font, fill=shadowcolor)
-    draw.text((x-2, y-2), text, font=font, fill=shadowcolor)
-    draw.text((x+2, y-2), text, font=font, fill=shadowcolor)
-    draw.text((x-2, y+2), text, font=font, fill=shadowcolor)
-    draw.text((x, y), text, font=font, fill=fillcolor)
-
 @bot.message_handler(commands=["necoarc"])
 def msg_necoarc(message):
         if message.reply_to_message is None or (message.reply_to_message.text is None and message.reply_to_message.caption is None):
@@ -218,12 +208,13 @@ def msg_bay(message):
             return
         fid = r.photos[0][-1].file_id
         img = get_pil(fid)
-        font = ImageFont.truetype('times-new-roman.ttf', size=42)
-        draw = ImageDraw.Draw(img)
-        fillcolor = (150, 0, 24)
-        shadowcolor = (53, 53, 53)
-        draw_stroke(draw,font,fillcolor,shadowcolor,'ОТБАЙРАКТАРЕН',0,0)
-        bot.send_photo(message.chat.id,send_pil(img))    
+        img2 = Image.new(mode = 'RGBA',size = (900,900))
+        draw = ImageDraw.Draw(img2)
+        arial = ImageFont.FreeTypeFont('times-new-roman.ttf', size=90)
+        draw.multiline_text((450, 450), 'ОТБАЙРАКТАРЕН', fill=(150, 0, 24), anchor='mm', font=arial, align='center', spacing=4, stroke_width=4, stroke_fill=(53, 53, 53))
+        img2 = img2.rotate(45)
+        img.paste(img2, (-130,-130), img2.convert('RGBA'))
+        bot.send_sticker(message.chat.id, send_pil(img))
 
 @bot.message_handler(commands=["cube"])
 def msg_cube(message):
