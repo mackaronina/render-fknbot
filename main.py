@@ -162,6 +162,16 @@ def draw_text_rectangle(draw,text,rect_w,rect_h,cord_x,cord_y):
     arial = ImageFont.FreeTypeFont('comicbd.ttf', size=selected_size)
     draw.multiline_text((cord_x, cord_y), text, fill='black', anchor='mm', font=arial, align='center', spacing=0)
 
+def draw_stroke(draw,font,fillcolor,shadowcolor,text,x,y):
+    draw.text((x-2, y), text, font=font, fill=shadowcolor)
+    draw.text((x+2, y), text, font=font, fill=shadowcolor)
+    draw.text((x, y-2), text, font=font, fill=shadowcolor)
+    draw.text((x, y+2), text, font=font, fill=shadowcolor)
+    draw.text((x-2, y-2), text, font=font, fill=shadowcolor)
+    draw.text((x+2, y-2), text, font=font, fill=shadowcolor)
+    draw.text((x-2, y+2), text, font=font, fill=shadowcolor)
+    draw.text((x, y), text, font=font, fill=fillcolor)
+
 @bot.message_handler(commands=["necoarc"])
 def msg_necoarc(message):
         if message.reply_to_message is None or (message.reply_to_message.text is None and message.reply_to_message.caption is None):
@@ -196,6 +206,24 @@ def msg_pet(message):
         mean = dominant_color(img)
         f = make(img, mean)
         bot.send_animation(message.chat.id,f,reply_to_message_id=message.reply_to_message.message_id) 
+
+@bot.message_handler(commands=["bay"])
+def msg_bay(message):
+        if message.reply_to_message is None:
+            bot.send_message(message.chat.id, 'Ответом на сообщение еблан',reply_to_message_id=message.message_id)
+            return
+        r = bot.get_user_profile_photos(message.reply_to_message.from_user.id)
+        if len(r.photos) == 0:
+            bot.send_message(message.chat.id, 'У этого пидора нет авы',reply_to_message_id=message.message_id)
+            return
+        fid = r.photos[0][-1].file_id
+        img = get_pil(fid)
+        font = ImageFont.truetype('times-new-roman.ttf', size=16)
+        draw = ImageDraw.Draw(img)
+        fillcolor = (150, 0, 24)
+        shadowcolor = (53, 53, 53)
+        draw_stroke(draw,font,fillcolor,shadowcolor,'ОТБАЙРАКТАРЕН',0,0)
+        bot.send_photo(message.chat.id,send_pil(img))    
 
 @bot.message_handler(commands=["cube"])
 def msg_cube(message):
@@ -251,7 +279,7 @@ def msg_set(message):
         bot.send_message(message.chat.id, 'Угомонись хохлинка',reply_to_message_id=message.message_id)
         return
     arg = int(message.text.split()[1])
-    chel = html.escape(message.reply_to_message.from_user.first_name, quote = True)
+    chel = html.escape(message.reply_to_message.from_user.full_name, quote = True)
     data = cursor.execute(f"SELECT id FROM users WHERE id = {message.reply_to_message.from_user.id}")
     data = data.fetchone()
     if data is None:
@@ -314,7 +342,7 @@ def handle_text(message, txt):
             return
         res = analize_toxicity(txt)
         if (res > 0.6) and (message.from_user.id > 0):
-            chel = html.escape(message.from_user.first_name, quote = True)
+            chel = html.escape(message.from_user.full_name, quote = True)
             set_reaction(message.chat.id,message.id,"😈")
             if message.chat.id in [-1001694727085, -1001646530790, -1001596293991, -1001592397575, -1001152773192]:
                 data = cursor.execute(f"SELECT id FROM users WHERE id = {message.from_user.id}")
@@ -349,11 +377,11 @@ def msg_text(message):
 def msg_chat(upd):
     print(upd.new_chat_member)
     if upd.new_chat_member.status == "kicked":
-        chel = html.escape(upd.new_chat_member.user.first_name, quote = True)
+        chel = html.escape(upd.new_chat_member.user.full_name, quote = True)
         bot.send_message(upd.chat.id, chel)
         bot.send_animation(upd.chat.id, 'CgACAgIAAx0CZQN7rQABAvvXZYaTUqw6yY1aRLQS4-ne8Xg4nmkAAociAAKNM5BKbkRUYQABc69sMwQ')
     elif upd.new_chat_member.status == "left" and upd.old_chat_member.status != "kicked":
-        chel = html.escape(upd.new_chat_member.user.first_name, quote = True)
+        chel = html.escape(upd.new_chat_member.user.full_name, quote = True)
         bot.send_message(upd.chat.id, chel)
         bot.send_animation(upd.chat.id, 'CgACAgIAAx0CZQN7rQABAv8oZYhghoptaY54elnBAm0-wjRmcxoAAhkoAAJpwchJ_S12XgABifSrMwQ')
 
@@ -394,7 +422,7 @@ def jobday():
     data = data.fetchone()
     idk = data[0]
     chel = data[1]
-    txt = f'Токсик дня <a href="tg://user?id={idk}">{chel}</a>'
+    txt = f'Токсик дня {chel}'
     cursor.execute(f"UPDATE users SET today = 0")
     for chatid in db:
         try:
