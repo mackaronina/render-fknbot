@@ -406,7 +406,7 @@ def jobday():
         img = img.convert("RGB")
         img.paste(img2, (-130,-130), img2.convert('RGBA'))
         m = bot.send_sticker(738931917, send_pil(img))
-        stik = m.stickers[-1].file_id
+        stik = m.sticker.file_id
     for chatid in db:
         try:
             bot.send_sticker(chatid, 'CAACAgIAAxkBAAEKWq5lDOyAX1vNodaWsT5amK0vGQe_ggACHCkAAspLuUtESxXfKFwfWTAE')
