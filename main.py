@@ -43,15 +43,6 @@ cursor = create_engine(f'mysql+pymysql://{username}:{password}@eu-central.connec
 db = []
 # ☣️
 
-def get_toxicity_level(user_id):
-    data = cursor.execute(f"SELECT level FROM users WHERE id = {user_id}")
-    data = data.fetchone()
-    if data is None:
-        level = 0
-    else:
-        level = data[0]
-    return level
-
 def dominant_color(image):
     width, height = 150,150
     image = image.resize((width, height),resample = 0)
@@ -288,7 +279,14 @@ def msg_toxic(message):
     if message.reply_to_message is None or message.reply_to_message.from_user.id < 0:
         bot.send_message(message.chat.id, 'Ответом на сообщение еблан',reply_to_message_id=message.message_id)
         return
-    level = get_toxicity_level(message.reply_to_message.from_user.id)
+    data = cursor.execute(f"SELECT level, max_text FROM users WHERE id = {message.reply_to_message.from_user.id}")
+    data = data.fetchone()
+    if data is None:
+        level = 0
+        max_text = None
+    else:
+        level = data[0]
+        max_text = data[1]
     text = f'Уровень токсичности:  {level} ☣️\n'
     if level < 10:
         leveltext = 'Добрый чел позитивный'
@@ -306,8 +304,9 @@ def msg_toxic(message):
         leveltext = 'Подлежит устранению согласно решению собвеза ООН'
     else:
         leveltext = '[ДАННЫЕ УДАЛЕНЫ]'
-        
     text += f'Диагноз:  {leveltext}'
+    if max_text is not None:
+        text += f'\n\nСамая токсичная цитата:\n<i>{max_text}</i>'
     bot.send_message(message.chat.id,text,reply_to_message_id=message.reply_to_message.message_id)
 
 @bot.message_handler(commands=["top"])
@@ -341,12 +340,20 @@ def handle_text(message, txt):
             chel = html.escape(message.from_user.full_name, quote = True)
             set_reaction(message.chat.id,message.id,"😈")
             if message.chat.id in [-1001694727085, -1001646530790, -1001596293991, -1001592397575, -1001152773192]:
-                data = cursor.execute(f"SELECT id FROM users WHERE id = {message.from_user.id}")
+                data = cursor.execute(f"SELECT max_toxic FROM users WHERE id = {message.from_user.id}")
                 data = data.fetchone()
                 if data is None:
                     cursor.execute(f"INSERT INTO users (id, name) VALUES ({message.from_user.id}, %s)", chel)
                 else:
-                    cursor.execute(f"UPDATE users SET level = level + 1, today = today + 1, name = %s WHERE id = {message.from_user.id}", chel)
+                    max_toxic = data[0]
+                    if res > max_toxic:
+                        txt = txt.replace('\n','')
+                        txt = html.escape(txt, quote = True)
+                        if len(txt) > 500:
+                            txt = (txt[:500] + '..')
+                        cursor.execute(f"UPDATE users SET level = level + 1, today = today + 1, name = %s, max_text = %s, max_toxic = {res} WHERE id = {message.from_user.id}", chel, txt)
+                    else:
+                        cursor.execute(f"UPDATE users SET level = level + 1, today = today + 1, name = %s WHERE id = {message.from_user.id}", chel)
         text_for_reaction = re.sub('[^а-я]', ' ', txt.lower()).split()
         if 'сбу' in text_for_reaction:
             print('сбу')
