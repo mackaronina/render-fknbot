@@ -207,7 +207,7 @@ def msg_kill(message):
         img2 = Image.new(mode='RGBA', size=(900,900))
         draw = ImageDraw.Draw(img2)
         arial = ImageFont.FreeTypeFont('times-new-roman.ttf', size=90)
-        draw.multiline_text((450, 450), 'ОТБАЙРАКТАРЕН', fill=(170, 0, 44), anchor='mm', font=arial, align='center', spacing=4, stroke_width=4, stroke_fill=(73, 73, 73))
+        draw.multiline_text((450, 450), 'ОТБАЙРАКТАРЕН', fill=(190, 0, 44), anchor='mm', font=arial, align='center', spacing=4, stroke_width=4, stroke_fill=(73, 73, 73))
         img2 = img2.rotate(45)
         img = img.convert("L")
         img = img.convert("RGB")
