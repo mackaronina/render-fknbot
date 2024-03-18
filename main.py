@@ -191,7 +191,28 @@ def msg_pet(message):
         img = get_pil(fid)
         mean = dominant_color(img)
         f = make(img, mean)
-        bot.send_animation(message.chat.id,f,reply_to_message_id=message.reply_to_message.message_id) 
+        bot.send_animation(message.chat.id,f,reply_to_message_id=message.reply_to_message.message_id)
+
+@bot.message_handler(commands=["kill"])
+def msg_kill(message):
+        if message.reply_to_message is None:
+            bot.send_message(message.chat.id, 'Ответом на сообщение еблан',reply_to_message_id=message.message_id)
+            return
+        r = bot.get_user_profile_photos(message.reply_to_message.from_user.id)
+        if len(r.photos) == 0:
+            bot.send_message(message.chat.id, 'У этого пидора нет авы',reply_to_message_id=message.message_id)
+            return
+        fid = r.photos[0][-1].file_id
+        img = get_pil(fid)
+        img2 = Image.new(mode='RGBA', size=(900,900))
+        draw = ImageDraw.Draw(img2)
+        arial = ImageFont.FreeTypeFont('times-new-roman.ttf', size=90)
+        draw.multiline_text((450, 450), 'ОТБАЙРАКТАРЕН', fill=(170, 0, 44), anchor='mm', font=arial, align='center', spacing=4, stroke_width=4, stroke_fill=(73, 73, 73))
+        img2 = img2.rotate(45)
+        img = img.convert("L")
+        img = img.convert("RGB")
+        img.paste(img2, (-130,-130), img2.convert('RGBA'))
+        bot.send_sticker(message.chat.id, send_pil(img), reply_to_message_id=message.reply_to_message.message_id)
 
 @bot.message_handler(commands=["cube"])
 def msg_cube(message):
@@ -386,33 +407,15 @@ def updater():
         time.sleep(1)
         
 def jobday():
-    data = cursor.execute(f"SELECT id, name FROM users WHERE today IN (SELECT MAX(today) FROM users)")
+    data = cursor.execute(f"SELECT name FROM users WHERE today IN (SELECT MAX(today) FROM users)")
     data = data.fetchone()
-    idk = data[0]
-    chel = data[1]
-    txt = f'Сегодня {chel} превысил норму токсичности'
+    chel = data[0]
+    txt = f'Сегодня {chel} перевыполнил норму токсичности'
     cursor.execute(f"UPDATE users SET today = 0")
-    stik = None
-    r = bot.get_user_profile_photos(idk)
-    if len(r.photos) != 0:
-        fid = r.photos[0][-1].file_id
-        img = get_pil(fid)
-        img2 = Image.new(mode='RGBA', size=(900,900))
-        draw = ImageDraw.Draw(img2)
-        arial = ImageFont.FreeTypeFont('times-new-roman.ttf', size=90)
-        draw.multiline_text((450, 450), 'ОТБАЙРАКТАРЕН', fill=(160, 0, 34), anchor='mm', font=arial, align='center', spacing=4, stroke_width=4, stroke_fill=(63, 63, 63))
-        img2 = img2.rotate(45)
-        img = img.convert("L")
-        img = img.convert("RGB")
-        img.paste(img2, (-130,-130), img2.convert('RGBA'))
-        m = bot.send_sticker(738931917, send_pil(img))
-        stik = m.sticker.file_id
     for chatid in db:
         try:
             bot.send_sticker(chatid, 'CAACAgIAAxkBAAEKWq5lDOyAX1vNodaWsT5amK0vGQe_ggACHCkAAspLuUtESxXfKFwfWTAE')
             bot.send_message(chatid, txt)
-            if stik is not None:
-                bot.send_sticker(chatid, stik)
         except Exception as e:
             print(e)
 
