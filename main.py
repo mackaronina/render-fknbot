@@ -131,6 +131,13 @@ def send_pil(im):
     bio.seek(0)
     return bio
 
+def send_webp(im):
+    bio = BytesIO()
+    bio.name = 'result.png'
+    im.save(bio, 'WEBP')
+    bio.seek(0)
+    return bio
+
 def analize_toxicity(text):
     client = discovery.build(
         "commentanalyzer",
@@ -212,7 +219,7 @@ def msg_kill(message):
         img = img.convert("L")
         img = img.convert("RGB")
         img.paste(img2, (-130,-130), img2.convert('RGBA'))
-        bot.send_sticker(message.chat.id, send_pil(img), reply_to_message_id=message.reply_to_message.message_id)
+        bot.send_sticker(message.chat.id, send_webp(img), reply_to_message_id=message.reply_to_message.message_id)
 
 @bot.message_handler(commands=["cube"])
 def msg_cube(message):
