@@ -23,12 +23,14 @@ import traceback
 from datetime import datetime, timedelta
 
 KIRYA = 630112565
+ME = 738931917
+
 API_KEY = 'AIzaSyBhxiNkKtphrX4TwPU-cOFIKY6v7q_GIFM'
 
 token = '6639737408:AAHOfnimdR2Gp0_mOS65k1i-Qm2YV_Co564'
 class ExHandler(telebot.ExceptionHandler):
     def handle(self, exc):
-        bot.send_message(738931917, traceback.format_exc())
+        bot.send_message(ME, traceback.format_exc())
         return True
 bot = telebot.TeleBot(token, threaded=True, num_threads=10, parse_mode='HTML', exception_handler = ExHandler())
 
@@ -172,7 +174,7 @@ def msg_necoarc(message):
             else:
                 text = message.reply_to_message.caption
             draw_text_rectangle(draw, text, 220, 106, 336, 80)
-            bot.add_sticker_to_set(user_id=738931917,name='necoarc_by_fknclown_bot',emojis='🫵',png_sticker=send_pil(img))
+            bot.add_sticker_to_set(user_id=ME,name='necoarc_by_fknclown_bot',emojis='🫵',png_sticker=send_pil(img))
             sset = bot.get_sticker_set('necoarc_by_fknclown_bot')
             bot.send_sticker(message.chat.id, sset.stickers[-1].file_id)
 
@@ -262,7 +264,7 @@ def msg_paint(message):
 
 @bot.message_handler(commands=["set"])
 def msg_set(message):
-    if message.from_user.id != 738931917:
+    if message.from_user.id != ME:
         bot.send_message(message.chat.id, 'Угомонись хохлинка',reply_to_message_id=message.message_id)
         return
     arg = int(message.text.split()[1])
@@ -463,7 +465,7 @@ def init_db():
 
 if __name__ == '__main__':
     init_db()
-    bot.send_message(738931917, 'Запущено')
+    bot.send_message(ME, 'Запущено')
     schedule.every().day.at("23:00").do(jobday)
     t = Thread(target=updater)
     t.start()
