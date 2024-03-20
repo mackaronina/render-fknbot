@@ -370,7 +370,7 @@ def handle_text(message, txt):
                 if res > max_toxic:
                     txt = txt.replace('\n','')
                     txt = html.escape(txt, quote = True)
-                     if len(txt) > 500:
+                    if len(txt) > 500:
                         txt = (txt[:500] + '..')
                     cursor.execute(f"UPDATE users SET level = level + 1, today = today + 1, name = %s, max_text = %s, max_toxic = {res} WHERE id = {message.from_user.id}", chel, txt)
                 else:
