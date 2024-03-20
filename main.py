@@ -312,7 +312,7 @@ def msg_toxic(message):
 @bot.message_handler(commands=["top"])
 def msg_top(message):
     text = 'Эти челы написали больше всего токсичных сообщений. Могут ли они гордиться этим? Несомненно\n\n'
-    data = cursor.execute(f'SELECT id, name, level FROM users ORDER BY level DESC LIMIT 10')
+    data = cursor.execute(f'SELECT id, name, level FROM users WHERE level > 0 ORDER BY level DESC LIMIT 10')
     data = data.fetchall()
     i = 1
     if data is not None:
@@ -325,6 +325,26 @@ def msg_top(message):
             else:
                 text += f'{i}.  {name}  {level} ☣️\n'
             i += 1
+    bot.send_message(message.chat.id,text,reply_to_message_id=message.message_id)
+
+@bot.message_handler(commands=["chats"])
+def msg_chats(message):
+    text = 'Фортеці токсичного фронту\n\n'
+    data = cursor.execute(f'SELECT id, name, level FROM chats WHERE level > 0 ORDER BY level DESC LIMIT 10')
+    data = data.fetchall()
+    i = 1
+    if data is not None:
+        for d in data:
+            idk = d[0]
+            name = d[1]
+            level = d[2]
+            if idk == -1001694727085:
+                continue
+            if i == 1:
+                text += f'🏆 <b>{name}</b>  {level} ☣️\n'
+            else:
+                text += f'{i}.  {name}  {level} ☣️\n'
+            i += 1
     bot.send_message(message.chat.id,text,reply_to_message_id=message.message_id) 
 
 def handle_text(message, txt):
@@ -332,28 +352,28 @@ def handle_text(message, txt):
         if message.chat.id < 0 and message.chat.id not in db:
             db.append(message.chat.id)
             cursor.execute(f'INSERT INTO chats (id) VALUES ({message.chat.id})')
-        #res = text2toxicity(txt, False)
         if message.from_user.id == KIRYA:
             return
         res = analize_toxicity(txt)
-        if (res > 0.6) and (message.from_user.id > 0):
-            chel = html.escape(message.from_user.full_name, quote = True)
+        if (res > 0.6) and message.from_user.id > 0 and message.chat.id < 0:
             set_reaction(message.chat.id,message.id,"😈")
-            if message.chat.id in [-1001694727085, -1001646530790, -1001596293991, -1001592397575, -1001152773192]:
-                data = cursor.execute(f"SELECT max_toxic FROM users WHERE id = {message.from_user.id}")
-                data = data.fetchone()
-                if data is None:
-                    cursor.execute(f"INSERT INTO users (id, name) VALUES ({message.from_user.id}, %s)", chel)
+            chel = html.escape(message.from_user.full_name, quote = True)
+            chat_name = html.escape(message.chat.title, quote = True)
+            data = cursor.execute(f"SELECT max_toxic FROM users WHERE id = {message.from_user.id}")
+            data = data.fetchone()
+            if data is None:
+                cursor.execute(f"INSERT INTO users (id, name) VALUES ({message.from_user.id}, %s)", chel)
+            else:
+                max_toxic = data[0]
+                if res > max_toxic:
+                    txt = txt.replace('\n','')
+                    txt = html.escape(txt, quote = True)
+                     if len(txt) > 500:
+                        txt = (txt[:500] + '..')
+                    cursor.execute(f"UPDATE users SET level = level + 1, today = today + 1, name = %s, max_text = %s, max_toxic = {res} WHERE id = {message.from_user.id}", chel, txt)
                 else:
-                    max_toxic = data[0]
-                    if res > max_toxic:
-                        txt = txt.replace('\n','')
-                        txt = html.escape(txt, quote = True)
-                        if len(txt) > 500:
-                            txt = (txt[:500] + '..')
-                        cursor.execute(f"UPDATE users SET level = level + 1, today = today + 1, name = %s, max_text = %s, max_toxic = {res} WHERE id = {message.from_user.id}", chel, txt)
-                    else:
-                        cursor.execute(f"UPDATE users SET level = level + 1, today = today + 1, name = %s WHERE id = {message.from_user.id}", chel)
+                    cursor.execute(f"UPDATE users SET level = level + 1, today = today + 1, name = %s WHERE id = {message.from_user.id}", chel)
+            cursor.execute(f"UPDATE chats SET level = level + 1, name = %s WHERE id = {message.chat.id}", chat_name)
         text_for_reaction = re.sub('[^а-я]', ' ', txt.lower()).split()
         if 'сбу' in text_for_reaction:
             print('сбу')
