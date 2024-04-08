@@ -327,27 +327,12 @@ def msg_top(message):
             else:
                 text += f'{i}.  {name}  {level} ☣️\n'
             i += 1
-    bot.send_message(message.chat.id,text,reply_to_message_id=message.message_id)
-
-@bot.message_handler(commands=["chats"])
-def msg_chats(message):
-    text = 'Фортеці токсичного фронту\n\n'
-    data = cursor.execute(f'SELECT id, name, level FROM chats WHERE level > 0 ORDER BY level DESC LIMIT 10')
-    data = data.fetchall()
-    i = 1
+    data = cursor.execute(f'SELECT name FROM chats WHERE level > 0 ORDER BY level DESC LIMIT 1')
+    data = data.fetchone()
     if data is not None:
-        for d in data:
-            idk = d[0]
-            name = d[1]
-            level = d[2]
-            if idk == -1001694727085:
-                continue
-            if i == 1:
-                text += f'🏆 <b>{name}</b>  {level} ☣️\n'
-            else:
-                text += f'{i}.  {name}  {level} ☣️\n'
-            i += 1
-    bot.send_message(message.chat.id,text,reply_to_message_id=message.message_id) 
+        name = data[0]
+        text += f'\n\nФортеця токсичного фронту:\n <b>{name}</b>'  
+    bot.send_message(message.chat.id,text,reply_to_message_id=message.message_id)
 
 def handle_text(message, txt):
         print('Сообщение получено')
@@ -357,7 +342,7 @@ def handle_text(message, txt):
         if message.from_user.id == KIRYA:
             return
         res = analize_toxicity(txt)
-        if (res > 0.6) and message.from_user.id > 0 and message.chat.id < 0:
+        if (res > 0.6) and message.from_user.id > 0 and message.chat.id < 0 and message.forward_from is None:
             set_reaction(message.chat.id,message.id,"😈")
             chel = html.escape(message.from_user.full_name, quote = True)
             chat_name = html.escape(message.chat.title, quote = True)
@@ -466,7 +451,7 @@ def init_db():
 if __name__ == '__main__':
     init_db()
     bot.send_message(ME, 'Запущено')
-    schedule.every().day.at("23:00").do(jobday)
+    schedule.every().day.at("22:00").do(jobday)
     t = Thread(target=updater)
     t.start()
     app.run(host='0.0.0.0',port=80, threaded = True)
