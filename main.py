@@ -331,7 +331,7 @@ def msg_top(message):
     data = data.fetchone()
     if data is not None:
         name = data[0]
-        text += f'\n\nФортеця токсичного фронту:\n <b>{name}</b>'  
+        text += f'\nФортеця токсичного фронту:\n <b>{name}</b>'  
     bot.send_message(message.chat.id,text,reply_to_message_id=message.message_id)
 
 def handle_text(message, txt):
