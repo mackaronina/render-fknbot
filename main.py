@@ -42,7 +42,7 @@ bot.set_webhook(url=APP_URL, allowed_updates=['message',  'callback_query', 'cha
 username = os.environ['USERNAME']
 password = os.environ['PASSWORD']
 #cursor = create_engine(f'mysql+pymysql://{username}:{password}@eu-central.connect.psdb.cloud:3306/nekodb', pool_recycle=280, connect_args={'ssl': {'ssl-mode': 'preferred'}})
-cursor = create_engine(f'postgresql+pyscopg2://postgres.hdahfrunlvoethhwinnc:gT77Av9pQ8IjleU2@aws-0-eu-central-1.pooler.supabase.com:5432/postgres', pool_recycle=280, connect_args={'ssl': {'ssl-mode': 'preferred'}})
+cursor = create_engine(f'postgresql://postgres.hdahfrunlvoethhwinnc:gT77Av9pQ8IjleU2@aws-0-eu-central-1.pooler.supabase.com:5432/postgres', pool_recycle=280, connect_args={'ssl': {'ssl-mode': 'preferred'}})
 db = []
 # ☣️
 
