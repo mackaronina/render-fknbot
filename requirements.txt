@@ -3,7 +3,7 @@ google-api-python-client==2.112.0
 Flask==2.3.2
 Pillow==9.2.0
 pet-pet-gif==1.0.2
-pyTelegramBotAPI==4.14.1
+pyTelegramBotAPI==4.17.0
 schedule==1.2.1
 SQLAlchemy==1.4.48
 psycopg2==2.9.9
