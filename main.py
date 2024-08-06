@@ -10,7 +10,7 @@ from threading import Thread
 from googleapiclient import discovery
 import time
 import schedule
-from curl_cffi import requests, CurlMimes
+from curl_cffi import requests, CurlMime
 from bs4 import BeautifulSoup
 import random
 import re
