@@ -10,7 +10,7 @@ from threading import Thread
 from googleapiclient import discovery
 import time
 import schedule
-import requests
+from curl_cffi import requests, CurlMimes
 from bs4 import BeautifulSoup
 import random
 import re
@@ -23,11 +23,12 @@ import traceback
 from datetime import datetime, timedelta
 
 KIRYA = 630112565
-ME = 738931917
+ME = 7258570440
+SERVICE_CHATID = -1002171923232
 
-API_KEY = 'AIzaSyBhxiNkKtphrX4TwPU-cOFIKY6v7q_GIFM'
+API_KEY = os.environ['API_KEY']
+token = os.environ['BOT_TOKEN']
 
-token = '6639737408:AAHOfnimdR2Gp0_mOS65k1i-Qm2YV_Co564'
 class ExHandler(telebot.ExceptionHandler):
     def handle(self, exc):
         bot.send_message(ME, traceback.format_exc())
@@ -165,19 +166,26 @@ def draw_text_rectangle(draw,text,rect_w,rect_h,cord_x,cord_y):
 
 @bot.message_handler(commands=["necoarc"])
 def msg_necoarc(message):
-        if message.reply_to_message is None or (message.reply_to_message.text is None and message.reply_to_message.caption is None):
-            bot.send_message(message.chat.id, 'Ответом на текст еблан',reply_to_message_id=message.message_id)
+        if message.reply_to_message is None or (message.reply_to_message.text is None and message.reply_to_message.photo is None):
+            bot.send_message(message.chat.id, 'Ответом на текст или фото еблан',reply_to_message_id=message.message_id)
             return
-        with Image.open('necoarc.png') as img:
-            draw = ImageDraw.Draw(img)
-            if message.reply_to_message.text is not None:
-                text = message.reply_to_message.text
-            else:
-                text = message.reply_to_message.caption
-            draw_text_rectangle(draw, text, 220, 106, 336, 80)
-            bot.add_sticker_to_set(user_id=ME,name='necoarc_by_fknclown_bot',emojis='🫵',png_sticker=send_pil(img))
-            sset = bot.get_sticker_set('necoarc_by_fknclown_bot')
-            bot.send_sticker(message.chat.id, sset.stickers[-1].file_id)
+        if message.reply_to_message.photo is None:
+            with Image.open('necoarc.png') as img:
+                draw = ImageDraw.Draw(img)
+                draw_text_rectangle(draw, message.reply_to_message.text, 220, 106, 336, 80)
+                bot.add_sticker_to_set(user_id=ME, name='sayneko_by_fknclown_bot', emojis='🫵',png_sticker=send_pil(img))
+                sset = bot.get_sticker_set('sayneko_by_fknclown_bot')
+                bot.send_sticker(message.chat.id, sset.stickers[-1].file_id)
+        else:
+            with Image.open('necopic.png') as im2:
+                im1 = get_pil(message.reply_to_message.photo[-1].file_id)
+                im1 = im1.resize((253, 169),  Image.ANTIALIAS)
+                im0 = Image.new(mode = 'RGB',size = (512,512))
+                im0.paste(im1.convert('RGB'), (243,334))
+                im0.paste(im2.convert('RGB'), (0,0), im2)
+                bot.add_sticker_to_set(user_id=ME, name='sayneko_by_fknclown_bot', emojis='🫵',png_sticker=send_pil(im0))
+                sset = bot.get_sticker_set('sayneko_by_fknclown_bot')
+                bot.send_sticker(message.chat.id, sset.stickers[-1].file_id)
 
 @bot.message_handler(commands=["pet"])
 def msg_pet(message):
@@ -233,24 +241,29 @@ def msg_cube(message):
         bio.seek(0)
         direct = random.choice(['left','right'])
         dat = {
-            "target": (None,1),
-            "MAX_FILE_SIZE": (None,1073741824),
-            "image[]": ('result.png',bio.getvalue()),
-            "speed": (None,"ufast"),
-            "bg_color": (None,"000000"),
-            "direction": (None,direct)
+            "target": 1,
+            "MAX_FILE_SIZE": 1073741824,
+            "speed": "ufast",
+            "bg_color": "000000",
+            "direction": direct
         }
+        mp = CurlMime()
+        mp.addpart(
+            name="image[]",
+            content_type="image/png",
+            filename="result.png",
+            data=bio.getvalue()
+        )
         with requests.Session() as s:
-            p = s.get("https://en.bloggif.com/cube-3d")
+            p = s.get("https://en.bloggif.com/cube-3d", impersonate="chrome110")
             soup = BeautifulSoup(p.text, 'lxml')
             tkn = soup.find('form')
             linkfrm = "https://en.bloggif.com" + tkn['action']
-            p = s.post(linkfrm, files=dat)
-            print(p)
+            p = s.post(linkfrm, data=dat, multipart=mp, impersonate="chrome110")
             soup = BeautifulSoup(p.text, 'lxml')
             img = soup.find('a', class_='button gray-button')
             linkgif = "https://en.bloggif.com" + img['href']
-            p = s.get(linkgif)
+            p = s.get(linkgif, impersonate="chrome110")
             bio = BytesIO(p.content)
             bio.name = 'result.gif'
             bio.seek(0)
@@ -375,9 +388,9 @@ def handle_text(message, txt):
 
 @bot.message_handler(func=lambda message: True, content_types=['photo','video','document','text','animation'])
 def msg_text(message):
-    if message.chat.id == -1001694727085 and message.photo is not None:
+    if message.chat.id == SERVICE_CHATID and message.photo is not None:
         bot.send_message(message.chat.id,str(message.photo[-1].file_id) + ' ' + str(message.photo[-1].file_size) + ' ' + bot.get_file_url(message.photo[-1].file_id), reply_to_message_id=message.message_id)
-    if message.chat.id == -1001694727085 and message.animation is not None:
+    if message.chat.id == SERVICE_CHATID and message.animation is not None:
         bot.send_message(message.chat.id,str(message.animation.file_id), reply_to_message_id=message.message_id)
     if message.text is not None:
         handle_text(message, message.text)
@@ -415,7 +428,6 @@ def send_paint(chatid):
         file.save(bio)
         bio.seek(0)
         bot.send_photo(int(chatid),photo = bio)
-        #-1001152773192
         return '!', 200
 
 @app.route('/paint')
