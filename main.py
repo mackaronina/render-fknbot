@@ -318,6 +318,7 @@ def msg_toxic(message):
     else:
         level = data[0]
         max_text = data[1]
+        bot.send_message(message.chat.id, str(data[2]))
         reaction_count = unpack(data[2])
     text = f'Уровень токсичности:  {level} ☣️\n'
     if level < 10:
