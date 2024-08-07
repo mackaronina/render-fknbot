@@ -215,6 +215,10 @@ def msg_pet(message):
         mean = dominant_color(img)
         f = make(img, mean)
         bot.send_animation(message.chat.id,f,reply_to_message_id=message.reply_to_message.message_id)
+        
+@bot.message_handler(commands=["test"])
+def msg_test(message):
+    cursor.execute("""UPDATE users SET reaction_count = '{"data": {}}' """)
 
 @bot.message_handler(commands=["kill"])
 def msg_kill(message):
@@ -318,7 +322,6 @@ def msg_toxic(message):
     else:
         level = data[0]
         max_text = data[1]
-        bot.send_message(message.chat.id, str(data[2]))
         reaction_count = unpack(data[2])
     text = f'Уровень токсичности:  {level} ☣️\n'
     if level < 10:
