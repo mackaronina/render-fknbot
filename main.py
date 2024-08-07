@@ -13,7 +13,7 @@ import schedule
 from curl_cffi import requests, CurlMime
 from bs4 import BeautifulSoup
 import random
-import re
+from re import search
 import os
 import json
 import html
@@ -31,14 +31,18 @@ token = os.environ['BOT_TOKEN']
 
 class ExHandler(telebot.ExceptionHandler):
     def handle(self, exc):
-        bot.send_message(ME, traceback.format_exc())
+        sio = StringIO(traceback.format_exc())
+        sio.name = 'log.txt'
+        sio.seek(0)
+        bot.send_document(ME, sio)
         return True
+
 bot = telebot.TeleBot(token, threaded=True, num_threads=10, parse_mode='HTML', exception_handler = ExHandler())
 
 APP_URL = f'https://fknbot.onrender.com/{token}'
 app = Flask(__name__)
 bot.remove_webhook()
-bot.set_webhook(url=APP_URL, allowed_updates=['message',  'callback_query', 'chat_member'])
+bot.set_webhook(url=APP_URL, allowed_updates=['message',  'callback_query', 'chat_member', 'message_reaction', 'message_reaction_count'])
 
 username = os.environ['USERNAME']
 password = os.environ['PASSWORD']
@@ -125,6 +129,16 @@ def send_pil(im):
     im.save(bio, 'PNG')
     bio.seek(0)
     return bio
+
+def pack(mas):
+    data = {"data": mas}
+    data = json.dumps(data,ensure_ascii=False)
+    return data
+    
+def unpack(data):
+    mas = json.loads(data)
+    mas = mas["data"]
+    return mas
 
 def send_webp(im):
     bio = BytesIO()
@@ -295,14 +309,16 @@ def msg_toxic(message):
     if message.reply_to_message is None or message.reply_to_message.from_user.id < 0:
         bot.send_message(message.chat.id, 'Ответом на сообщение еблан',reply_to_message_id=message.message_id)
         return
-    data = cursor.execute(f"SELECT level, max_text FROM users WHERE id = {message.reply_to_message.from_user.id}")
+    data = cursor.execute(f"SELECT level, max_text, reaction_count FROM users WHERE id = {message.reply_to_message.from_user.id}")
     data = data.fetchone()
     if data is None:
         level = 0
         max_text = None
+        reaction_count = {}
     else:
         level = data[0]
         max_text = data[1]
+        reaction_count = unpack(data[2])
     text = f'Уровень токсичности:  {level} ☣️\n'
     if level < 10:
         leveltext = 'Добрый чел позитивный'
@@ -323,6 +339,8 @@ def msg_toxic(message):
     text += f'Диагноз:  {leveltext}'
     if max_text is not None:
         text += f'\n\nСамая токсичная цитата:\n<i>{max_text}</i>'
+    if len(reaction_count) > 0:
+        text += f'\n\nЛюбимая реакция: {max(reaction_count.items(), key=lambda k_v: k_v[1])[0]}'
     bot.send_message(message.chat.id,text,reply_to_message_id=message.reply_to_message.message_id)
 
 @bot.message_handler(commands=["top"])
@@ -375,14 +393,14 @@ def handle_text(message, txt):
                 else:
                     cursor.execute(f"UPDATE users SET level = level + 1, today = today + 1, name = %s WHERE id = {message.from_user.id}", chel)
             cursor.execute(f"UPDATE chats SET level = level + 1, name = %s WHERE id = {message.chat.id}", chat_name)
-        text_for_reaction = re.sub('[^а-я]', ' ', txt.lower()).split()
-        if 'сбу' in text_for_reaction:
+        low = txt.lower()
+        if search(r'\bсбу\b',low):
             print('сбу')
             bot.send_sticker(message.chat.id, 'CAACAgIAAxkBAAEKWrBlDPH3Ok1hxuoEndURzstMhckAAWYAAm8sAAIZOLlLPx0MDd1u460wBA',reply_to_message_id=message.message_id)
-        elif 'порох' in text_for_reaction or 'порошенко' in text_for_reaction or 'гетьман' in text_for_reaction or 'рошен' in text_for_reaction:
+        elif search(r'\bпоро[хш]',low) or search(r'\bрошен',low) or search(r'\bгетьман',low):
             print('порох')
             bot.send_sticker(message.chat.id, 'CAACAgIAAxkBAAEK-splffs7OZYtr8wzINEw4lxbvwywoAACXSoAAg2JiEoB98dw3NQ3FjME',reply_to_message_id=message.message_id)
-        elif 'зелебоба' in text_for_reaction or 'зелень' in text_for_reaction or 'зеленский' in text_for_reaction or 'зеленський' in text_for_reaction:
+        elif search(r'\bзеленс',low) or search(r'\bзелебоб',low):
             print('зелебоба')
             bot.send_sticker(message.chat.id, 'CAACAgIAAxkBAAELGOplmDc9SkF-ZnVsdNl4vhvzZEo7BQAC5SwAAkrDgEr_AVwN_RkClDQE',reply_to_message_id=message.message_id)
 
@@ -403,11 +421,26 @@ def msg_chat(upd):
     if upd.new_chat_member.status == "kicked":
         chel = html.escape(upd.new_chat_member.user.full_name, quote = True)
         bot.send_message(upd.chat.id, chel)
-        bot.send_animation(upd.chat.id, 'CgACAgIAAx0CZQN7rQABAvvXZYaTUqw6yY1aRLQS4-ne8Xg4nmkAAociAAKNM5BKbkRUYQABc69sMwQ')
+        bot.send_animation(upd.chat.id, 'CgACAgIAAyEFAASBdOsgAANWZrGFweKOwigppG363BNKbnL35RsAAociAAKNM5BKjSL2FftcjLg1BA')
     elif upd.new_chat_member.status == "left" and upd.old_chat_member.status != "kicked":
         chel = html.escape(upd.new_chat_member.user.full_name, quote = True)
         bot.send_message(upd.chat.id, chel)
-        bot.send_animation(upd.chat.id, 'CgACAgIAAx0CZQN7rQABAv8oZYhghoptaY54elnBAm0-wjRmcxoAAhkoAAJpwchJ_S12XgABifSrMwQ')
+        bot.send_animation(upd.chat.id, 'CgACAgIAAyEFAASBdOsgAANZZrGFw-0hdA1DY49Bfpzvj6fbOyYAAhkoAAJpwchJ35-X8nZzKaQ1BA')
+
+@bot.message_reaction_handler()
+def msg_reaction(event):
+    idk = event.user.id
+    data = cursor.execute(f"SELECT reaction_count FROM users WHERE id = {idk}")
+    data = data.fetchone()
+    if data is not None and len(event.new_reaction) > 0 and event.new_reaction[0].type == 'emoji':
+        reaction_count = unpack(data[0])
+        react = event.new_reaction[0].emoji
+        if react in reaction_count.keys():
+            reaction_count[react] += 1
+        else:
+            reaction_count[react] = 1
+        cursor.execute(f"UPDATE users SET reaction_count = '{pack(reaction_count)}' WHERE id = {idk}")
+
 
 @app.route('/' + token, methods=['POST'])
 def get_message():
