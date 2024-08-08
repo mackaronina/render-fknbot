@@ -422,14 +422,17 @@ def msg_text(message):
 @bot.chat_member_handler()
 def msg_chat(upd):
     print(upd.new_chat_member)
+    chel = html.escape(upd.new_chat_member.user.full_name, quote = True)
     if upd.new_chat_member.status == "kicked":
-        chel = html.escape(upd.new_chat_member.user.full_name, quote = True)
         bot.send_message(upd.chat.id, chel)
         bot.send_animation(upd.chat.id, 'CgACAgIAAyEFAASBdOsgAANWZrGFweKOwigppG363BNKbnL35RsAAociAAKNM5BKjSL2FftcjLg1BA')
     elif upd.new_chat_member.status == "left" and upd.old_chat_member.status != "kicked":
-        chel = html.escape(upd.new_chat_member.user.full_name, quote = True)
         bot.send_message(upd.chat.id, chel)
         bot.send_animation(upd.chat.id, 'CgACAgIAAyEFAASBdOsgAANZZrGFw-0hdA1DY49Bfpzvj6fbOyYAAhkoAAJpwchJ35-X8nZzKaQ1BA')
+    elif upd.new_chat_member.status == "member" and upd.old_chat_member.status == "left":
+        bot.send_message(upd.chat.id, chel)
+        bot.send_animation(upd.chat.id, 'CgACAgQAAyEFAASBdOsgAAPOZrQQobFw1gR6bSlxu98bv8hvTh8AAr0FAALf-yRT6QMzZRN64Xs1BA')
+
 
 @bot.message_reaction_handler()
 def msg_reaction(event):
