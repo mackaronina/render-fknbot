@@ -429,7 +429,7 @@ def msg_chat(upd):
     elif upd.new_chat_member.status == "left" and upd.old_chat_member.status != "kicked":
         bot.send_message(upd.chat.id, chel)
         bot.send_animation(upd.chat.id, 'CgACAgIAAyEFAASBdOsgAANZZrGFw-0hdA1DY49Bfpzvj6fbOyYAAhkoAAJpwchJ35-X8nZzKaQ1BA')
-    elif upd.new_chat_member.status == "member" and upd.old_chat_member.status == "left":
+    elif upd.new_chat_member.status == "member" and (upd.old_chat_member.status == "left" or upd.old_chat_member.status == "kicked"):
         bot.send_message(upd.chat.id, chel)
         bot.send_animation(upd.chat.id, 'CgACAgQAAyEFAASBdOsgAAPOZrQQobFw1gR6bSlxu98bv8hvTh8AAr0FAALf-yRT6QMzZRN64Xs1BA')
 
