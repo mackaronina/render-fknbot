@@ -336,16 +336,16 @@ def msg_toxic(message):
     elif level < 400:
         leveltext = 'Опасен для общества, изолируйте нахуй'
     elif level < 1000:
-        leveltext = 'Угроза для страны, данные переданы в СБУ'
-    elif level < 2000:
+        leveltext = 'Представляет прямую угрозу национальной безопасности Украины. Все сообщения переданы в СБУ'
+    elif level < 1500:
         leveltext = 'Подлежит устранению согласно решению собвеза ООН'
     else:
-        leveltext = '[ДАННЫЕ УДАЛЕНЫ]'
+        leveltext = 'Классифицирован как SCP-███'
     text += f'Диагноз:  {leveltext}'
     if max_text is not None:
         text += f'\n\nСамая токсичная цитата:\n<i>{max_text}</i>'
     if len(reaction_count) > 0:
-        text += f'\n\nЛюбимая реакция: {max(reaction_count.items(), key=lambda k_v: k_v[1])[0]}'
+        text += f'\n\nЛюбимая реакция:  {max(reaction_count.items(), key=lambda k_v: k_v[1])[0]}'
     bot.send_message(message.chat.id,text,reply_to_message_id=message.reply_to_message.message_id)
 
 @bot.message_handler(commands=["top"])
