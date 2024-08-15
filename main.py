@@ -216,10 +216,6 @@ def msg_pet(message):
         mean = dominant_color(img)
         f = make(img, mean)
         bot.send_animation(message.chat.id,f,reply_to_message_id=message.reply_to_message.message_id)
-        
-@bot.message_handler(commands=["test"])
-def msg_test(message):
-    cursor.execute("""UPDATE users SET reaction_count = '{"data": {}}' """)
 
 @bot.message_handler(commands=["kill"])
 def msg_kill(message):
@@ -308,6 +304,13 @@ def msg_set(message):
         cursor.execute(f"INSERT INTO users (id, name, level) VALUES ({message.reply_to_message.from_user.id}, %s, {arg})", chel)
     else:
         cursor.execute(f"UPDATE users SET level = {arg}, name = %s WHERE id = {message.reply_to_message.from_user.id}", chel)
+
+@bot.message_handler(commands=["rndm"])
+def msg_rndm(message):
+    data = cursor.execute(f"SELECT max_text FROM users WHERE max_text IS NOT NULL ORDER BY random() LIMIT 1")
+    data = data.fetchone()
+    if data is not None:
+        bot.send_message(message.chat.id, data[0], reply_to_message_id=message.message_id)
 
 @bot.message_handler(commands=["toxic"])
 def msg_toxic(message):
@@ -482,10 +485,13 @@ def updater():
         time.sleep(1)
         
 def jobday():
-    data = cursor.execute(f"SELECT name FROM users WHERE today IN (SELECT MAX(today) FROM users)")
+    data = cursor.execute(f"SELECT name FROM users WHERE today IN (SELECT MAX(today) FROM users) AND today > 0")
     data = data.fetchone()
-    chel = data[0]
-    txt = f'Сегодня {chel} перевыполнил норму токсичности'
+    if data is not None:
+        chel = data[0]
+        txt = f'Сегодня {chel} перевыполнил норму токсичности'
+    else:
+        txt = f'Сегодня обошлось без токсиков'
     cursor.execute(f"UPDATE users SET today = 0")
     for chatid in db:
         try:
