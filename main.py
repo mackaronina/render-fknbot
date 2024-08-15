@@ -497,6 +497,8 @@ def jobday():
         try:
             bot.send_sticker(chatid, 'CAACAgIAAxkBAAEKWq5lDOyAX1vNodaWsT5amK0vGQe_ggACHCkAAspLuUtESxXfKFwfWTAE')
             bot.send_message(chatid, txt)
+            if bot.get_chat_member(chatid, bot.get_me().id).status != 'administrator':
+                bot.send_message(chatid, 'У бота нет админки в этом чате, а должна быть сука')
         except Exception as e:
             print(e)
 
