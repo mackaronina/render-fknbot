@@ -513,7 +513,7 @@ def init_db():
 if __name__ == '__main__':
     init_db()
     bot.send_message(ME, 'Запущено')
-    schedule.every().day.at("22:00").do(jobday)
+    schedule.every().day.at("23:00").do(jobday)
     t = Thread(target=updater)
     t.start()
     app.run(host='0.0.0.0',port=80, threaded = True)
