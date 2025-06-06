@@ -221,7 +221,7 @@ def msg_necoarc(message):
 
 @bot.message_handler(commands=["joke"])
 def msg_joke(message):
-    bot.reply_to(message, pyjokes.get_joke("ru"))
+    bot.reply_to(message, pyjokes.get_joke("ru").strip('.'))
 
 
 @bot.message_handler(commands=["pet"])
