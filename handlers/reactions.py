@@ -6,7 +6,7 @@ from database import User
 from middlewares.db import DbSessionMiddleware
 
 router = Router()
-router.message.middleware(DbSessionMiddleware())
+router.message_reaction.middleware(DbSessionMiddleware())
 
 
 @router.message_reaction()
