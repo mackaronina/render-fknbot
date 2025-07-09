@@ -1,0 +1,39 @@
+body {
+    color: var(--tg-theme-text-color);
+    background: var(--tg-theme-bg-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 18px;
+    text-align: center;
+    overflow: hidden;
+}
+
+.a {
+    display: flex;
+    flex-direction: row;
+    margin: 0 -10px;
+}
+
+.b {
+    display: flex;
+    flex-direction: column;
+    margin: 0 15px;
+}
+
+canvas {
+    border-style: solid;
+    border-width: 5px;
+    border-color: #cacd58;
+}
+
+button {
+    background-color: #3b88c3;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    width: 60px;
+    height: 60px;
+    border: none;
+    border-radius: 20%;
+}
