@@ -63,6 +63,7 @@ async def msg_toxic(message: Message, session: AsyncSession) -> None:
     for limit, level_text in TOXIC_LEVEL_TEXTS.items():
         if toxic_level < limit:
             text += f'Диагноз:  {level_text}\n'
+            break
     if max_toxic_text is not None:
         text += f'\n\nСамая токсичная цитата:\n<blockquote expandable>{max_toxic_text}</blockquote>'
     if reactions_count is not None:
