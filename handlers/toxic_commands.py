@@ -37,7 +37,7 @@ async def msg_top(message: Message, session: AsyncSession) -> None:
     result = await session.execute(select(Chat).where(Chat.toxic_level > 0).order_by(Chat.toxic_level.desc()).limit(1))
     chat = result.scalars().one_or_none()
     if chat is not None:
-        text += f'\nФортеця токсичного фронту:\n <b>{chat.name}</b>'
+        text += f'\nФортеця токсичного фронту:\n<b>{chat.name}</b>'
     await message.reply(text)
 
 
@@ -65,7 +65,7 @@ async def msg_toxic(message: Message, session: AsyncSession) -> None:
             text += f'Диагноз:  {level_text}\n'
             break
     if max_toxic_text is not None:
-        text += f'\n\nСамая токсичная цитата:\n<blockquote expandable>{max_toxic_text}</blockquote>'
+        text += f'Самая токсичная цитата:\n<blockquote expandable>{max_toxic_text}</blockquote>\n'
     if reactions_count is not None:
-        text += f'\n\nЛюбимая реакция:  {max(reactions_count.items(), key=lambda k_v: k_v[1])[0]}'
+        text += f'Любимая реакция:  {max(reactions_count.items(), key=lambda k_v: k_v[1])[0]}'
     await message.reply(text)

@@ -8,7 +8,6 @@ from aiogram.types import Message, BufferedInputFile
 from bs4 import BeautifulSoup
 from curl_cffi import CurlMime, AsyncSession
 from petpetgif.saveGif import save_transparent_gif
-from pkg_resources import resource_stream
 
 
 async def get_profile_pic(message: Message, bot: Bot) -> BinaryIO | None:
@@ -67,7 +66,7 @@ async def generate_pet_gif(profile_pic: BinaryIO) -> BufferedInputFile:
         canvas = Image.new('RGBA', size=resolution, color=mean)
         canvas.paste(base.resize((round(width * resolution[0]), round(height * resolution[1]))),
                      (round(offset_x * resolution[0]), round(offset_y * resolution[1])))
-        with Image.open(resource_stream(__name__, f'static/images/pet{i}.gif')).convert('RGBA').resize(
+        with Image.open(f'static/images/pet{i}.gif').convert('RGBA').resize(
                 resolution) as pet:
             canvas.paste(pet, mask=pet)
         images.append(canvas)
