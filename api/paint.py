@@ -18,7 +18,7 @@ templates = Jinja2Templates(directory='templates')
 
 @router.post('/send')
 async def send_paint(
-        chat_id: Annotated[int, Form()],
+        chat_id: Annotated[str, Form()],
         init_data: Annotated[str, Form()],
         image: Annotated[bytes, File()],
         bot: Bot = Depends(get_bot)
