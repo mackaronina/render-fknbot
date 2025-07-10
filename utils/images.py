@@ -1,3 +1,4 @@
+import logging
 import random
 from io import BytesIO
 from typing import BinaryIO
@@ -44,6 +45,7 @@ async def generate_cube_gif(profile_pic: BinaryIO) -> BufferedInputFile:
         link = f'https://en.bloggif.com{token}'
         resp = await s.post(link, data=data, multipart=formdata)
         soup = BeautifulSoup(resp.text, 'lxml')
+        logging.info(resp.text)
         img = soup.find('a', class_='button gray-button')['href']
         link = f'https://en.bloggif.com{img}'
         resp = await s.get(link)
@@ -85,7 +87,9 @@ def generate_kill_sticker(profile_pic: BinaryIO) -> BufferedInputFile:
     img2 = img2.rotate(45)
     img = img.convert('L').convert('RGB')
     img.paste(img2, (-130, -130), img2.convert('RGBA'))
-    return BufferedInputFile(img.tobytes(), filename='sticker.webp')
+    bio = BytesIO()
+    img.save(bio, 'WEBP')
+    return BufferedInputFile(bio.getvalue(), filename='sticker.webp')
 
 
 async def get_pil(bot: Bot, file_id: str) -> Image:

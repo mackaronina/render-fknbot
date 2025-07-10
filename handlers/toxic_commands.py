@@ -64,8 +64,8 @@ async def msg_toxic(message: Message, session: AsyncSession) -> None:
         if toxic_level < limit:
             text += f'Диагноз:  {level_text}\n'
             break
-    if max_toxic_text is not None:
-        text += f'Самая токсичная цитата:\n<blockquote expandable>{max_toxic_text}</blockquote>\n'
     if reactions_count is not None:
-        text += f'Любимая реакция:  {max(reactions_count.items(), key=lambda k_v: k_v[1])[0]}'
+        text += f'Любимая реакция:  {max(reactions_count.items(), key=lambda k_v: k_v[1])[0]}\n'
+    if max_toxic_text is not None:
+        text += f'Самая токсичная цитата:\n<blockquote expandable>{max_toxic_text}</blockquote>'
     await message.reply(text)

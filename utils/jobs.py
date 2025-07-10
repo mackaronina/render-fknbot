@@ -10,7 +10,7 @@ from database import connection, User, Chat
 
 
 @connection
-async def job_day(session: AsyncSession, bot: Bot):
+async def job_day(bot: Bot, session: AsyncSession) -> None:
     result = await session.execute(
         select(User).where(User.today_toxic_level > 0).order_by(User.today_toxic_level.desc()).limit(1)
     )

@@ -14,11 +14,11 @@ router = Router()
 router.message.middleware(DbSessionMiddleware())
 
 
-@router.message(F.text | F.caption)
+@router.message(F.text | F.caption, F.chat.type != 'private')
 async def msg_text(message: Message, session: AsyncSession) -> None:
     text = message.text or message.caption
     toxicity = await analize_toxicity(text)
-    if toxicity > THRESHOLD and message.chat.type != 'private' and message.forward_from is None:
+    if toxicity > THRESHOLD and message.forward_from is None:
         await message.react([ReactionTypeEmoji(emoji=REACTION)])
         await update_chat_info(message.chat, session)
         await update_user_info(message.from_user, session, toxicity, text)

@@ -1,4 +1,4 @@
-from aiogram import Router, types
+from aiogram import Router, types, F
 from aiogram.types import ReactionTypeEmoji
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -9,7 +9,7 @@ router = Router()
 router.message_reaction.middleware(DbSessionMiddleware())
 
 
-@router.message_reaction()
+@router.message_reaction(F.chat.type != 'private')
 async def msg_reaction(event: types.MessageReactionUpdated, session: AsyncSession) -> None:
     user = await session.get(User, event.user.id)
     if user is not None and len(event.new_reaction) > 0 and isinstance(event.new_reaction[0], ReactionTypeEmoji):
