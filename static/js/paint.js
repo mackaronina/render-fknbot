@@ -31,8 +31,10 @@ Telegram.WebApp.onEvent('mainButtonClicked', function () {
     tg.MainButton.disable()
     canvas.toBlob(async function (blob) {
         const data = new FormData();
-        data.append('file', blob, 'file')
-        await fetch(`/paint/send/${chatId}`, {method: 'POST', body: data});
+        data.append('chat_id', chatId);
+        data.append('init_data', tg.initData);
+        data.append('image', blob, 'image.png');
+        await fetch('/paint/send', {method: 'POST', body: data});
         tg.close();
     }, 'image/png');
 });

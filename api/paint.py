@@ -1,24 +1,36 @@
 import logging
+from typing import Annotated
 
 from aiogram import Bot
 from aiogram.types import BufferedInputFile
-from fastapi import APIRouter, UploadFile, Depends
+from aiogram.utils.web_app import safe_parse_webapp_init_data
+from fastapi import APIRouter, Depends, Form, File
 from fastapi.requests import Request
 from fastapi.templating import Jinja2Templates
-from starlette.responses import HTMLResponse
+from starlette.responses import HTMLResponse, JSONResponse
 
+from config import BOT_TOKEN
 from utils.depends import get_bot
 
 router = APIRouter(prefix='/paint')
 templates = Jinja2Templates(directory='templates')
 
 
-@router.post('/send/{chat_id}')
-async def send_paint(chat_id: int, file: UploadFile, bot: Bot = Depends(get_bot)) -> dict:
-    content = await file.read()
-    await bot.send_photo(chat_id, BufferedInputFile(content, filename='paint.png'))
+@router.post('/send')
+async def send_paint(
+        chat_id: Annotated[int, Form()],
+        init_data: Annotated[str, Form()],
+        image: Annotated[bytes, File()],
+        bot: Bot = Depends(get_bot)
+) -> JSONResponse:
+    try:
+        safe_parse_webapp_init_data(BOT_TOKEN, init_data)
+    except ValueError:
+        logging.warning(f'Image from webapp not sent to {chat_id} due to incorrect init data')
+        return JSONResponse({'ok': False, 'error': 'Wrong init data'}, 401)
+    await bot.send_photo(chat_id, BufferedInputFile(image, filename='paint.png'))
     logging.info(f'Image from webapp sent to {chat_id}')
-    return {'message': 'ok'}
+    return JSONResponse({'ok': True})
 
 
 @router.get('/')
