@@ -49,7 +49,7 @@ async def msg_toxic(message: Message, session: AsyncSession) -> None:
     else:
         user_id = message.from_user.id
         name = html.escape(message.from_user.full_name)
-    text = f'<b>Токсик  {name}</b>\n\n'
+    text = f'<b>Токсик {name}</b>\n\n'
     user = await session.get(User, user_id)
     if user is not None:
         toxic_level = user.toxic_level

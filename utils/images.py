@@ -39,15 +39,15 @@ async def generate_cube_gif(profile_pic: BinaryIO) -> BufferedInputFile:
         data=profile_pic.read()
     )
     async with AsyncSession(impersonate='chrome110') as s:
-        resp = await s.get('https://en.bloggif.com/cube-3d')
+        resp = await s.get('https://www.bloggif.com/cube-3d')
         soup = BeautifulSoup(resp.text, 'lxml')
         token = soup.find('form')['action']
-        link = f'https://en.bloggif.com{token}'
+        link = f'https://www.bloggif.com{token}'
         resp = await s.post(link, data=data, multipart=formdata)
         soup = BeautifulSoup(resp.text, 'lxml')
         logging.info(resp.text)
         img = soup.find('a', class_='button gray-button')['href']
-        link = f'https://en.bloggif.com{img}'
+        link = f'https://www.bloggif.com{img}'
         resp = await s.get(link)
         return BufferedInputFile(resp.content, filename='cube.gif')
 
