@@ -4,7 +4,7 @@ from typing import Annotated
 from aiogram import Bot
 from aiogram.types import BufferedInputFile
 from aiogram.utils.web_app import safe_parse_webapp_init_data
-from fastapi import APIRouter, Depends, Form, File
+from fastapi import APIRouter, Depends, Form, File, UploadFile
 from fastapi.requests import Request
 from fastapi.templating import Jinja2Templates
 from starlette.responses import HTMLResponse, JSONResponse
@@ -20,7 +20,7 @@ templates = Jinja2Templates(directory='templates')
 async def send_paint(
         chat_id: Annotated[str, Form()],
         init_data: Annotated[str, Form()],
-        image: Annotated[bytes, File()],
+        image: Annotated[UploadFile, File()],
         bot: Bot = Depends(get_bot)
 ) -> JSONResponse:
     try:
@@ -28,7 +28,8 @@ async def send_paint(
     except ValueError:
         logging.warning(f'Image from webapp not sent to {chat_id} due to incorrect init data')
         return JSONResponse({'ok': False, 'error': 'Wrong init data'}, 401)
-    await bot.send_photo(chat_id, BufferedInputFile(image, filename='paint.png'))
+    content = await image.read()
+    await bot.send_photo(chat_id, BufferedInputFile(content, filename='paint.png'))
     logging.info(f'Image from webapp sent to {chat_id}')
     return JSONResponse({'ok': True})
 
