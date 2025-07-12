@@ -12,6 +12,8 @@ const undoButton = document.getElementById("undo");
 const clearButton = document.getElementById("clear");
 
 tg.expand();
+tg.disableVerticalSwipes();
+tg.lockOrientation();
 tg.MainButton.setText("Send picture");
 tg.MainButton.show();
 tg.MainButton.enable();
