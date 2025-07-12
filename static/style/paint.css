@@ -12,26 +12,24 @@ body {
 .a {
     display: flex;
     flex-direction: row;
-    margin: 0 -10px;
 }
 
 .b {
     display: flex;
     flex-direction: column;
-    margin: 0 15px;
+    margin: 15px 15px;
 }
 
 canvas {
+    margin: 50px 0 0 0;
+    border-radius: 3%;
     border-style: solid;
     border-width: 5px;
-    border-color: #cacd58;
+    border-color: var(--tg-theme-secondary-bg-color);
 }
 
 button {
     background-color: #3b88c3;
-    color: white;
-    font-weight: bold;
-    text-align: center;
     width: 60px;
     height: 60px;
     border: none;
