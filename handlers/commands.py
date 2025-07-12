@@ -2,8 +2,8 @@ from aiogram import Router, Bot
 from aiogram.filters import Command
 from aiogram.types import Message
 
-from keyboards.paint import keyboard_paint_link
-from utils.images import get_profile_pic, generate_kill_sticker, generate_cube_gif, generate_pet_gif
+from keyboards.paint import keyboard_paint_start
+from utils.images_processing import get_profile_pic, generate_kill_sticker, generate_cube_gif, generate_pet_gif
 
 router = Router()
 
@@ -51,5 +51,5 @@ async def msg_kill(message: Message, bot: Bot) -> None:
 
 @router.message(Command('paint'))
 async def msg_paint(message: Message) -> None:
-    markup = keyboard_paint_link(message.chat.id)
+    markup = keyboard_paint_start(message.chat.id)
     await message.reply('Нажми на кнопку чтобы отправить свой клоунский рисунок', reply_markup=markup)

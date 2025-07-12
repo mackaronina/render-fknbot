@@ -1,6 +1,4 @@
 const tg = window.Telegram.WebApp;
-const chatId = tg.initDataUnsafe.start_param;
-
 const canvas = document.getElementById("canvas");
 const context = canvas.getContext("2d");
 
@@ -26,12 +24,21 @@ context.strokeStyle = "black";
 context.lineCap = "round";
 context.lineJoin = "round";
 
+const startParams = tg.initDataUnsafe.start_param.split('__');
+let startImg = null;
+if (startParams.length > 1) {
+    startImg = new Image();
+    startImg.src = `/paint/picture/${startParams[1]}`;
+    startImg.onload = () => {
+        context.drawImage(startImg, 0, 0);
+    };
+}
+
 Telegram.WebApp.onEvent('mainButtonClicked', function () {
     tg.MainButton.hide()
     tg.MainButton.disable()
     canvas.toBlob(async function (blob) {
         const data = new FormData();
-        data.append('chat_id', chatId);
         data.append('init_data', tg.initData);
         data.append('image', blob, 'image.png');
         await fetch('/paint/send', {method: 'POST', body: data});
@@ -127,8 +134,12 @@ clearButton.addEventListener("click", function (e) {
     canvas.toBlob(function (blob) {
         canvasHistory.push(blob);
     }, 'image/png');
-    for (let i = 0; i < 3; i++) {
-        context.rect(0, 0, 400, 400);
-        context.fill();
+    if (startImg) {
+        context.drawImage(startImg, 0, 0);
+    } else {
+        for (let i = 0; i < 3; i++) {
+            context.rect(0, 0, 400, 400);
+            context.fill();
+        }
     }
 });

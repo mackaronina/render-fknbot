@@ -1,6 +1,7 @@
 import logging
 
 from aiogram import Bot
+from aiogram.exceptions import TelegramAPIError
 from aiogram.types import ChatMemberAdministrator
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -33,5 +34,5 @@ async def job_day(bot: Bot, session: AsyncSession) -> None:
             if not isinstance(member, ChatMemberAdministrator):
                 logging.warning(f"Bot doesn't have administrator rights in chat {chat.id}")
                 await bot.send_message(chat.id, 'У бота нет админки в этом чате, а должна быть сука')
-        except:
+        except TelegramAPIError:
             logging.warning(f'Message to chat with id {chat.id} not sent')
