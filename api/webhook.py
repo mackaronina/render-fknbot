@@ -4,13 +4,13 @@ from fastapi import APIRouter, Depends
 from fastapi.requests import Request
 from fastapi.responses import HTMLResponse
 
-from config import BOT_TOKEN
+from config import settings
 from utils.depends import get_bot, get_dp
 
 router = APIRouter(prefix='')
 
 
-@router.post(f'/{BOT_TOKEN}', include_in_schema=False)
+@router.post(f'/{settings.bot_token.get_secret_value()}', include_in_schema=False)
 async def webhook(request: Request, bot: Bot = Depends(get_bot), dp: Dispatcher = Depends(get_dp)) -> None:
     update = Update.model_validate(await request.json(), context={'bot': bot})
     await dp.feed_update(bot, update)

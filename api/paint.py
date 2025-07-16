@@ -9,7 +9,7 @@ from fastapi.requests import Request
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 
-from config import BOT_TOKEN
+from config import settings
 from keyboards.paint import keyboard_paint_continue
 from utils.depends import get_bot
 
@@ -24,7 +24,7 @@ async def send_paint(
         bot: Bot = Depends(get_bot)
 ) -> JSONResponse:
     try:
-        data = safe_parse_webapp_init_data(BOT_TOKEN, init_data)
+        data = safe_parse_webapp_init_data(settings.bot_token.get_secret_value(), init_data)
         chat_id = int(data.start_param.split('__')[0])
     except ValueError:
         logging.warning(f'Image from webapp not sent due to incorrect init data')

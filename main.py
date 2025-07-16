@@ -11,7 +11,7 @@ from fastapi.staticfiles import StaticFiles
 
 from api import webhook, paint
 from commands import set_commands
-from config import TIME_ZONE, BOT_TOKEN, REPORT_CHAT_ID, WEBHOOK_DOMAIN, HOST, PORT
+from config import settings
 from database import create_tables
 from handlers import commands, toxic_commands, chat_members, errors, messages, reactions
 from utils.jobs import job_day
@@ -22,7 +22,8 @@ async def main() -> None:
 
     await create_tables()
 
-    bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML, link_preview_is_disabled=True))
+    bot = Bot(token=settings.bot_token.get_secret_value(),
+              default=DefaultBotProperties(parse_mode=ParseMode.HTML, link_preview_is_disabled=True))
     dp = Dispatcher()
     dp.include_routers(commands.router, toxic_commands.router, chat_members.router, errors.router,
                        messages.router, reactions.router)
@@ -35,17 +36,17 @@ async def main() -> None:
     app.state.bot = bot
     app.state.dp = dp
 
-    scheduler = AsyncIOScheduler(timezone=TIME_ZONE)
+    scheduler = AsyncIOScheduler(timezone=settings.time_zone)
     scheduler.add_job(job_day, 'cron', (bot,), hour=1, minute=1)
     scheduler.start()
 
-    await bot.send_message(REPORT_CHAT_ID, 'Бот запущен')
+    await bot.send_message(settings.report_chat_id, 'Бот запущен')
     await bot.delete_webhook()
     # Uncomment for polling
     # await dp.start_polling(bot)
-    await bot.set_webhook(url=f'{WEBHOOK_DOMAIN}/{BOT_TOKEN}',
+    await bot.set_webhook(url=f'{settings.webhook_domain}/{settings.bot_token.get_secret_value()}',
                           drop_pending_updates=True)
-    await uvicorn.Server(uvicorn.Config(app, host=HOST, port=PORT)).serve()
+    await uvicorn.Server(uvicorn.Config(app, host=settings.host, port=settings.port)).serve()
 
 
 if __name__ == '__main__':

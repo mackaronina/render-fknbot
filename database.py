@@ -8,6 +8,8 @@ from sqlalchemy import BigInteger, func, JSON
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
+from config import settings
+
 
 class CConnection(Connection):
     def _get_unique_id(self, prefix: str) -> str:
@@ -15,7 +17,7 @@ class CConnection(Connection):
 
 
 engine = create_async_engine(
-    'postgresql+asyncpg://postgres.kfomxohquxuvljvayrlm:N49G0h3UNJk9osny@aws-0-eu-north-1.pooler.supabase.com:6543/postgres',
+    settings.db.get_url(),
     connect_args={
         "statement_cache_size": 0,
         "prepared_statement_cache_size": 0,

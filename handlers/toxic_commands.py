@@ -6,7 +6,7 @@ from aiogram.types import Message
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from config import TOXIC_LEVEL_TEXTS
+from config import settings
 from database import User, Chat
 from middlewares.db import DbSessionMiddleware
 
@@ -60,7 +60,7 @@ async def msg_toxic(message: Message, session: AsyncSession) -> None:
         max_toxic_text = None
         reactions_count = None
     text += f'Уровень токсичности:  {toxic_level} ☣️\n'
-    for limit, level_text in TOXIC_LEVEL_TEXTS.items():
+    for limit, level_text in settings.toxic.level_texts.items():
         if toxic_level < limit:
             text += f'Диагноз:  {level_text}\n'
             break
