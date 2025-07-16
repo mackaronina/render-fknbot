@@ -10,7 +10,8 @@ router = Router()
 
 @router.message(Command('start'))
 async def msg_start(message: Message) -> None:
-    await message.reply('Я самый клоунский бот на фкн')
+    await message.reply('Я бот, созданный чтобы отслеживать уровень токсичности на фкн\n'
+                        'Исходный код: https://github.com/mackaronina/render-fknbot')
 
 
 @router.message(Command('cube'))
