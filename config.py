@@ -60,4 +60,3 @@ class Settings(ConfigBase):
 
 
 settings = Settings()
-print(settings.db.get_url())
